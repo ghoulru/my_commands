@@ -4,7 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:process_run/shell.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
+import 'copyfiles.dart';
+import 'screens/passwords/passwords.dart';
 
+enum ScreenType {
+  passwords,
+  teplo,
+}
+
+const bool DEBUG = true;
 /*
  *
  * Билдим
@@ -15,6 +23,7 @@ import 'package:window_manager/window_manager.dart';
  * работа с окном
  * https://github.com/leanflutter/window_manager
  *
+ * TODO чтение/запись архива с паролями к сайтам, хранить наверное в БД дарта
  *
  */
 void main() async {
@@ -25,11 +34,11 @@ void main() async {
     // Set to frameless window
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
-    await windowManager.setSize(Size(800, 600));
+    await windowManager.setSize(Size(1200, 800));
     await windowManager.center();
-    // await windowManager.show();
-    await windowManager.hide();
-    await windowManager.setSkipTaskbar(true);
+    await windowManager.show();
+    // await windowManager.hide();
+    // await windowManager.setSkipTaskbar(true);
   });
 
   runApp(const MyApp());
@@ -42,45 +51,56 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WindowListener {
+class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProviderStateMixin {
   final SystemTray _systemTray = SystemTray();
+  final CopyFiles _copyFiles = CopyFiles();
+
   // final AppWindow _appWindow = AppWindow();
 
   static const _nodeVersions = <String>['17.5.0', '16.14.0', '13.14.0'];
   String _currentNodeVersion = '';
 
+  late TabController _mainTabsController;
+  final Map<String, dynamic> _currentScreen = {
+    "type": ScreenType.passwords,
+    "title": Passwords.title,
+  };
+
   // String _trayInfo = "";
 
   @override
   void initState() {
+    super.initState();
     windowManager.addListener(this);
     init();
 
-    super.initState();
+    _mainTabsController = TabController(vsync: this, length: 2);
+
+
   }
 
   @override
   void dispose() {
     windowManager.removeListener(this);
+    _mainTabsController.dispose();
 
     super.dispose();
   }
 
   @override
   void onWindowClose() async {
-
     bool _isPreventClose = await windowManager.isPreventClose();
     // debugPrint("onWindowClose prevented=$_isPreventClose");
     if (_isPreventClose) {
       // debugPrint("onWindowClose prevented");
       await windowManager.hide();
-
     }
   }
 
   void init() async {
     debugPrint("init");
     await windowManager.setPreventClose(true);
+    windowManager.setTitle(_currentScreen['title']);
     setState(() {});
 
     var controller = ShellLinesController();
@@ -98,6 +118,17 @@ class _MyAppState extends State<MyApp> with WindowListener {
       setInfo(1);
     });
     await shell.run('nvm current');
+    // debugPrint("init 2");
+
+    // switch (_currentScreen) {
+    //   case ScreenType.passwords:
+    //     await windowManager.setTitle(Passwords.title);
+    //     break;
+    //   default:
+    //
+    //     break;
+    // }
+
     // setInfo(2);
   }
 
@@ -129,8 +160,16 @@ class _MyAppState extends State<MyApp> with WindowListener {
 
     final menu = [
       SubMenu(label: 'Node.js версии', children: nodeVersionsItems),
+      // MenuItem(
+      //     label: 'Закрыть',
+      //     onClicked: () async {
+      //       var shell = Shell(verbose: false);
+      //       await shell.run('cd "C:\Users\LouD\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" && start .');
+      //
+      //     }),
       // MenuItem(label: 'Show', onClicked: _appWindow.show),
       // MenuItem(label: 'Hide', onClicked: _appWindow.hide),
+
       MenuSeparator(),
       // MenuItem(label: 'Закрыть', onClicked: _appWindow.close),
       MenuItem(
@@ -147,6 +186,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   Future<void> initSystemTray() async {
     debugPrint("initSystemTray $_currentNodeVersion");
 
+    // const String path = DEBUG ? 'assets/process.ico' : 'assets/zombie.ico';
     const String path = 'assets/zombie.ico';
 
     // We first init the systray menu and then add the menu entries
@@ -163,7 +203,8 @@ class _MyAppState extends State<MyApp> with WindowListener {
       // debugPrint("eventName: $eventName");
       if (eventName == "leftMouseDown") {
       } else if (eventName == "leftMouseUp") {
-        // await windowManager.show();
+        await windowManager.show();
+        // await windowManager.center();
       } else if (eventName == "rightMouseDown") {
       } else if (eventName == "rightMouseUp") {
         _systemTray.popUpContextMenu();
@@ -175,23 +216,49 @@ class _MyAppState extends State<MyApp> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    Widget screen = const Passwords();
+    // TeploinformForm()
+    debugPrint("main build " + _currentScreen.toString());
+
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: Center(
-            child: Text(
-          'Hello World',
-        )),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(50.0),
+          child: AppBar(
+            // title: const Text("Name"),
+            elevation: 0,
+            backgroundColor: Colors.blueGrey[400],
+            bottom: TabBar(
+                controller: _mainTabsController,
+                isScrollable: true,
+                indicatorColor: Colors.black,
+                tabs: [
+                  Tab(text: Passwords.title),
+                  Tab(text: "Чето еще"),
+                ]
+            ),
+          ),
+        ),
+        body: TabBarView(
+            controller: _mainTabsController,
+            children: [
+              Passwords(),
+              Text("sdfsdf")
+            ]
+        ),
+        // body: const Center(
+        //   child: Passwords(), //Text('Hello World')
+        // ),
       ),
     );
   }
 
-  // @override
-  // void onWindowFocus() {
-  //   // Make sure to call once.
-  //   // setState(() {});
-  //   // do something
-  //   // init();
-  //
-  // }
+  @override
+  void onWindowFocus() {
+    // Make sure to call once.
+    setState(() {});
+    // do something
+    // init();
+  }
 }
