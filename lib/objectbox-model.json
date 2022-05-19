@@ -1,0 +1,101 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:2675329927980441605",
+      "lastPropertyId": "3:7034692668164663745",
+      "name": "CategoryTabModel",
+      "properties": [
+        {
+          "id": "1:1816030199728981195",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:816146809335039323",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:7034692668164663745",
+          "name": "sort",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:543114357366806874",
+      "lastPropertyId": "3:510973918699378807",
+      "name": "PasswordsItem",
+      "properties": [
+        {
+          "id": "1:7902067711050016355",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1649532452265075981",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:510973918699378807",
+          "name": "categoryId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "1:8654647992541905420",
+          "relationTarget": "CategoryTabModel"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:5617649913534481621",
+      "lastPropertyId": "4:270572916990233661",
+      "name": "PasswordsItemEntity",
+      "properties": [
+        {
+          "id": "1:3435656437487757177",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:208306671054135815",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:8007586191733937292",
+          "name": "sort",
+          "type": 6
+        },
+        {
+          "id": "4:270572916990233661",
+          "name": "parentId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "2:5752429500254167048",
+          "relationTarget": "PasswordsItem"
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "3:5617649913534481621",
+  "lastIndexId": "2:5752429500254167048",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

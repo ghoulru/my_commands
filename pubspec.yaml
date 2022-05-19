@@ -32,11 +32,15 @@ dependencies:
   system_tray: ^0.1.0
   process_run: ^0.12.3+2
   vertical_tabs: ^0.2.0
+  objectbox: ^1.5.0
+  objectbox_flutter_libs: any
+  confirm_dialog: ^1.0.1
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  contextmenu: ^2.0.1
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +54,8 @@ dev_dependencies:
   flutter_lints: ^1.0.0
   #msix: ^3.1.4
   window_manager: ^0.1.6
+  build_runner: ^2.0.0
+  objectbox_generator: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

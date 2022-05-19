@@ -1,11 +1,13 @@
 // import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:my_commands/screens/passwords/models.dart';
 import 'package:process_run/shell.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 import 'copyfiles.dart';
 import 'screens/passwords/passwords.dart';
+import 'objectbox.dart';
 
 enum ScreenType {
   passwords,
@@ -13,6 +15,9 @@ enum ScreenType {
 }
 
 const bool DEBUG = true;
+
+late ObjectBox objectbox;
+
 /*
  *
  * Билдим
@@ -23,10 +28,10 @@ const bool DEBUG = true;
  * работа с окном
  * https://github.com/leanflutter/window_manager
  *
- * TODO чтение/запись архива с паролями к сайтам, хранить наверное в БД дарта
+ * TODO чтение/запись архива с паролями к сайтам, хранить наверное в БД дарта https://pub.dev/packages/objectbox
  *
  */
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
@@ -40,6 +45,10 @@ void main() async {
     // await windowManager.hide();
     // await windowManager.setSkipTaskbar(true);
   });
+
+  objectbox = await ObjectBox.create();
+  // print("---main start---");
+  // print(objectbox.store);
 
   runApp(const MyApp());
 }
@@ -98,7 +107,7 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
   }
 
   void init() async {
-    debugPrint("init");
+    debugPrint("main init");
     await windowManager.setPreventClose(true);
     windowManager.setTitle(_currentScreen['title']);
     setState(() {});
@@ -116,6 +125,17 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
 
       await initSystemTray();
       setInfo(1);
+
+
+
+      // final categoryTabsBox = objectbox.store.box<CategoryTabModel>();
+      // final tabMy = CategoryTabModel()
+      //   ..name = 'my'
+      //   ..sort = 1;
+      // categoryTabsBox.put(tabMy);
+      //
+      // final tabs = categoryTabsBox.getAll();
+      // print(tabs);
     });
     await shell.run('nvm current');
     // debugPrint("init 2");
@@ -216,7 +236,7 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    Widget screen = const Passwords();
+    // Widget screen = Passwords();
     // TeploinformForm()
     debugPrint("main build " + _currentScreen.toString());
 
@@ -224,18 +244,18 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(50.0),
+          preferredSize: Size.fromHeight(34.0),
           child: AppBar(
             // title: const Text("Name"),
             elevation: 0,
-            backgroundColor: Colors.blueGrey[400],
+            backgroundColor: Colors.blueGrey[500],
             bottom: TabBar(
                 controller: _mainTabsController,
                 isScrollable: true,
                 indicatorColor: Colors.black,
                 tabs: [
-                  Tab(text: Passwords.title),
-                  Tab(text: "Чето еще"),
+                  Tab(text: Passwords.title, height: 30),
+                  Tab(text: "Чето еще", height: 30),
                 ]
             ),
           ),
@@ -243,7 +263,7 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
         body: TabBarView(
             controller: _mainTabsController,
             children: [
-              Passwords(),
+              Passwords(store: objectbox.store),
               Text("sdfsdf")
             ]
         ),
