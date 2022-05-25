@@ -2,19 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:contextmenu/contextmenu.dart';
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'models.dart';
-
+import 'package:logger/logger.dart';
+var logger = Logger();
 
 class CategoryTab extends StatelessWidget {
-  // final String title;
-  final Function onEdit;
-  final CategoryTabModel tab;
 
-  const CategoryTab({
+  CategoryTab({
     Key? key,
     required this.tab,
-    required this.onEdit
-    // required this.onTap,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onAddItem,
   }) : super(key: key);
+
+  CategoryTabModel tab;
+  final Function onEdit;
+  final Function onDelete;
+  final Function onAddItem;
 
 
   @override
@@ -22,11 +26,26 @@ class CategoryTab extends StatelessWidget {
 
     // print("build tab=");
     // print(tab?.name);
+    // logger.d('onEdit type', onEdit.runtimeType);
+    // logger.d('onDelete type', onDelete.runtimeType);
 
     return ContextMenuArea(items: [
 
       ListTile(
-        title: const Text('Редактировать'),
+        title: const Text('Добавить элемент'),
+        onTap: () {
+          onAddItem(id: 0, category: tab);
+        },
+      ),
+      Divider(
+        height: 20,
+        thickness: 1,
+        indent: 0,
+        endIndent: 0,
+        color: Colors.grey[400],
+      ),
+      ListTile(
+        title: const Text('Редактировать вкладку'),
         // contentPadding: EdgeInsets.all(2.0),
         minVerticalPadding: 0,
         horizontalTitleGap: 0,
@@ -36,19 +55,27 @@ class CategoryTab extends StatelessWidget {
           onEdit(tab.id);
         },
       ),
+
       ListTile(
         // leading: Icon(Icons.model_training),
-        title: Text('Удалить'),
+        title: const Text('Удалить вкладку'),
         enabled: tab.items.isEmpty,
         onTap: () async {
-          // debugPrint("Option 2 action");
-          if (await confirm(context)) {
-            debugPrint("Option 2 action");
+          if (await confirm(
+              context,
+            title: null,//const Text(''),
+            content: const Text('Подтвердите удаление'),
+            textOK: const Text('Да'),
+            textCancel: const Text('Нет'),
+          )) {
+            debugPrint("ontap delete");
+
+            onDelete(tab.id);
           }
         },
       )
     ],
-        width: 200,
+        width: 300,
         // child: Text(title)
         child: Padding(
           padding: EdgeInsets.only(left: 8, right: 15, top: 10, bottom: 10),
@@ -56,6 +83,7 @@ class CategoryTab extends StatelessWidget {
             // Text('tab')
           Row(
             children: [
+              Text(tab.id.toString()),
               Text(tab.name),
               const SizedBox(width: 5.0),
               Text(
@@ -64,9 +92,6 @@ class CategoryTab extends StatelessWidget {
               ),
             ],
           )
-
-          // Tab(text: title, height: 30)
-          //Tab(text: title, height: 30)
         )
     );
   }

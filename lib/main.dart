@@ -90,8 +90,11 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
 
   @override
   void dispose() {
+    print('---main dispose---');
     windowManager.removeListener(this);
     _mainTabsController.dispose();
+    objectbox.store.close();
+
 
     super.dispose();
   }
@@ -107,6 +110,8 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
   }
 
   void init() async {
+
+
     debugPrint("main init");
     await windowManager.setPreventClose(true);
     windowManager.setTitle(_currentScreen['title']);
@@ -238,7 +243,9 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
   Widget build(BuildContext context) {
     // Widget screen = Passwords();
     // TeploinformForm()
-    debugPrint("main build " + _currentScreen.toString());
+    // debugPrint("main build " + _currentScreen.toString());
+    // debugPrintStack(label: '123', maxFrames: 2);
+    // print(StackTrace.current.toString());
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,

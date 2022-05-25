@@ -17,7 +17,9 @@
         {
           "id": "2:816146809335039323",
           "name": "name",
-          "type": 9
+          "type": 9,
+          "flags": 2080,
+          "indexId": "3:2973430421584005801"
         },
         {
           "id": "3:7034692668164663745",
@@ -56,7 +58,7 @@
     },
     {
       "id": "3:5617649913534481621",
-      "lastPropertyId": "4:270572916990233661",
+      "lastPropertyId": "7:1782043273554827416",
       "name": "PasswordsItemEntity",
       "properties": [
         {
@@ -82,13 +84,28 @@
           "flags": 520,
           "indexId": "2:5752429500254167048",
           "relationTarget": "PasswordsItem"
+        },
+        {
+          "id": "5:2562439339223622601",
+          "name": "type",
+          "type": 9
+        },
+        {
+          "id": "6:1744243488198430266",
+          "name": "value",
+          "type": 9
+        },
+        {
+          "id": "7:1782043273554827416",
+          "name": "dbSubtype",
+          "type": 6
         }
       ],
       "relations": []
     }
   ],
   "lastEntityId": "3:5617649913534481621",
-  "lastIndexId": "2:5752429500254167048",
+  "lastIndexId": "3:2973430421584005801",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

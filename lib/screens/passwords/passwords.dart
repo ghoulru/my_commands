@@ -1,14 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:vertical_tabs/vertical_tabs.dart';
+import 'models.dart';
 import 'category_view.dart';
 import 'category_tab.dart';
 import 'category_editor.dart';
-import 'models.dart';
-import '../../objectbox.dart';
+import 'password_item_editor.dart';
+
+// import '../../objectbox.dart';
 import 'package:my_commands/objectbox.g.dart';
+import 'package:logger/logger.dart';
 
-
+var logger = Logger();
 
 /**
  * Как сохранить состояние при переключении табов
@@ -18,20 +21,13 @@ import 'package:my_commands/objectbox.g.dart';
 class Passwords extends StatefulWidget {
   final Store store;
   late final Box categoryTabsBox;
+  late final Box passwordsItemsBox;
 
-  Passwords({
-    Key? key,
-    required this.store
-  }) : super(key: key) {
-    print('Passwords constructor');
+  Passwords({Key? key, required this.store}) : super(key: key) {
+    // print('Passwords constructor');
+    // logger.d('Passwords constructor');
     categoryTabsBox = store.box<CategoryTabModel>();
-
-    // final tabMy = CategoryTabModel()
-    //   ..name = 'Мои сайты и прочее'
-    //   ..sort = 1;
-    // categoryTabsBox.put(tabMy);
-
-
+    passwordsItemsBox = store.box<PasswordsItem>();
   }
 
   static String title = 'Пароли';
@@ -39,20 +35,18 @@ class Passwords extends StatefulWidget {
   @override
   State<Passwords> createState() => PasswordsState();
 }
+
 // SingleTickerProviderStateMixin
 class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
-
-
-  late List<Widget> _categoryTabs;
+  late List<CategoryTab> _categoryTabs;
   late TabController _categoryTabsController;
+
+
   Widget view = const Center(
-    child: CircularProgressIndicator(
-      value: null,
-      strokeWidth: 7.0,
-    )
-  );
-
-
+        child: CircularProgressIndicator(
+          value: null,
+          strokeWidth: 7.0,
+        ));
 
   void doEditCategoryTab(int id) {
     debugPrint('doEditCategoryTab ' + id.toString());
@@ -62,47 +56,47 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     });
   }
 
-  void showTabs() {
+  //{int currentTabId = 0}
+  void showTabs({int currentTabId = 0}) {
     final tabs = widget.categoryTabsBox.getAll();
-    print(tabs.length);
 
-    List<Widget> ct = [];
+    // List<Widget> ct = [];
+    List<CategoryTab> ct = [];
 
-    //TODO sort tabs
+    //sort tabs
     tabs.sort((a, b) => a.sort.compareTo(b.sort));
 
-    tabs.forEach((tab) {
-      print("tab name " + tab.name + " id=" + tab.id.toString());
-      if (tab != null) {
-        ct.add(
-            CategoryTab(
-                key: UniqueKey(),
-                tab: tab,
-                onEdit: doEditCategoryTab
-              // onEdit: () {
-              //   doEditCategoryTab(tab.id);
-              // }
-            )
-        );
-      }
-    });
-    _categoryTabs = ct;
-    _categoryTabsController = TabController(vsync: this, length: ct.length);
+    int tabIndex = 0;
+    int i = 0;
+    for (CategoryTabModel tab in tabs) {
+      ct.add(CategoryTab(
+          key: UniqueKey(),
+          tab: tab,
+          onEdit: doEditCategoryTab,
+          onDelete: deleteCategory,
+          onAddItem: showItemEditor)
+      );
 
+      if (tab.id == currentTabId) tabIndex = i;
+      i++;
+    }
+
+    _categoryTabs = ct;
+    _categoryTabsController = TabController(vsync: this, length: ct.length, initialIndex: tabIndex);
 
     setState(() {
       view = CategoryView(
-        categoryTabs: _categoryTabs,
-        categoryTabsController: _categoryTabsController,
-        doEditCategoryTab: doEditCategoryTab,
+          categoryTabs: _categoryTabs,
+          categoryTabsController: _categoryTabsController,
+          doEditCategoryTab: doEditCategoryTab
       );
     });
   }
 
   void saveCategory({
-  required int? id,
-  required String name,
-  required int sort
+    required int? id,
+    required String name,
+    required int sort
   }) {
     // print('saveCategory');
     if (id == null) {
@@ -110,20 +104,39 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
       return;
     }
     final cat = CategoryTabModel()
-        ..name = name
-        ..sort = sort;
+      ..name = name
+      ..sort = sort;
     if (id == 0) {
       widget.categoryTabsBox.put(cat);
-    }
-    else {
+    } else {
       cat.id = id;
       widget.categoryTabsBox.put(cat);
     }
 
+    showTabs(currentTabId: id);
+  }
+
+  void deleteCategory(int id) {
+    widget.categoryTabsBox.remove(id);
     showTabs();
   }
-  void deleteCategory({required id}) {
 
+  void showItemEditor({required int id, required CategoryTabModel category}) {
+    logger.i('showItemEditor ' + id.toString());
+    // logger.i(category.toString());
+
+    setState(() {
+      view = PasswordItemEditor(
+          data: null,
+          category: category,
+          onSave: saveItem,
+          onClose: showTabs,
+          editable: true
+      );
+    });
+  }
+  void saveItem(data) {
+    logger.d(data);
   }
 
   @override
@@ -132,24 +145,10 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     super.initState();
 
     showTabs();
-    // view = CategoryEditor(category: null, onSave: saveCategory);
-
-    // widget.categoryTabsBox.remove(1);
-
-
-
-    // if (_categoryTabs.isNotEmpty) {
-    //   view = CategoryView(
-    //       categoryTabs: _categoryTabs,
-    //       categoryTabsController: _categoryTabsController,
-    //       doEditCategoryTab: doEditCategoryTab,
-    //   );
-    // }
-    // else {
-    //   view = const Center(
-    //     child: Text('passwords passwords passwords passwords '),
-    //   );
-    // }
+  }
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -160,23 +159,23 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     // debugPrint("view type");
     // print(view.runtimeType);
     return view;
-   return const Center(
+    return const Center(
       child: Text('passwords passwords passwords passwords '),
     );
 
     // if (_categoryTabs) {
     //   return Null;
     // }
-   // if (_categoryTabs.isNotEmpty) {
-   //   return CategoryView(
-   //       categoryTabs: _categoryTabs,
-   //       categoryTabsController: _categoryTabsController
-   //   );
-   // }
-   // else
-   //   return Center(
-   //        child: Text('passwords passwords passwords passwords '),
-   //      );
+    // if (_categoryTabs.isNotEmpty) {
+    //   return CategoryView(
+    //       categoryTabs: _categoryTabs,
+    //       categoryTabsController: _categoryTabsController
+    //   );
+    // }
+    // else
+    //   return Center(
+    //        child: Text('passwords passwords passwords passwords '),
+    //      );
 
     // return Container(
     //   color: Colors.blue,
@@ -196,6 +195,4 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     //   )
     // );
   }
-  
 }
-

@@ -33,7 +33,8 @@ final _entities = <ModelEntity>[
             id: const IdUid(2, 816146809335039323),
             name: 'name',
             type: 9,
-            flags: 0),
+            flags: 2080,
+            indexId: const IdUid(3, 2973430421584005801)),
         ModelProperty(
             id: const IdUid(3, 7034692668164663745),
             name: 'sort',
@@ -76,7 +77,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(3, 5617649913534481621),
       name: 'PasswordsItemEntity',
-      lastPropertyId: const IdUid(4, 270572916990233661),
+      lastPropertyId: const IdUid(7, 1782043273554827416),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -100,7 +101,22 @@ final _entities = <ModelEntity>[
             type: 11,
             flags: 520,
             indexId: const IdUid(2, 5752429500254167048),
-            relationTarget: 'PasswordsItem')
+            relationTarget: 'PasswordsItem'),
+        ModelProperty(
+            id: const IdUid(5, 2562439339223622601),
+            name: 'type',
+            type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(6, 1744243488198430266),
+            name: 'value',
+            type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(7, 1782043273554827416),
+            name: 'dbSubtype',
+            type: 6,
+            flags: 0)
       ],
       relations: <ModelRelation>[],
       backlinks: <ModelBacklink>[])
@@ -127,7 +143,7 @@ ModelDefinition getObjectBoxModel() {
   final model = ModelInfo(
       entities: _entities,
       lastEntityId: const IdUid(3, 5617649913534481621),
-      lastIndexId: const IdUid(2, 5752429500254167048),
+      lastIndexId: const IdUid(3, 2973430421584005801),
       lastRelationId: const IdUid(0, 0),
       lastSequenceId: const IdUid(0, 0),
       retiredEntityUids: const [],
@@ -226,11 +242,16 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (PasswordsItemEntity object, fb.Builder fbb) {
           final nameOffset = fbb.writeString(object.name);
-          fbb.startTable(5);
+          final typeOffset = fbb.writeString(object.type);
+          final valueOffset = fbb.writeString(object.value);
+          fbb.startTable(8);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, nameOffset);
           fbb.addInt64(2, object.sort);
           fbb.addInt64(3, object.parent.targetId);
+          fbb.addOffset(4, typeOffset);
+          fbb.addOffset(5, valueOffset);
+          fbb.addInt64(6, object.dbSubtype);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -242,7 +263,13 @@ ModelDefinition getObjectBoxModel() {
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
             ..name = const fb.StringReader(asciiOptimization: true)
                 .vTableGet(buffer, rootOffset, 6, '')
-            ..sort = const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
+            ..sort = const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0)
+            ..type = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 12, '')
+            ..value = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 14, '')
+            ..dbSubtype =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
           object.parent.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
           object.parent.attach(store);
@@ -300,4 +327,16 @@ class PasswordsItemEntity_ {
   /// see [PasswordsItemEntity.parent]
   static final parent = QueryRelationToOne<PasswordsItemEntity, PasswordsItem>(
       _entities[2].properties[3]);
+
+  /// see [PasswordsItemEntity.type]
+  static final type =
+      QueryStringProperty<PasswordsItemEntity>(_entities[2].properties[4]);
+
+  /// see [PasswordsItemEntity.value]
+  static final value =
+      QueryStringProperty<PasswordsItemEntity>(_entities[2].properties[5]);
+
+  /// see [PasswordsItemEntity.dbSubtype]
+  static final dbSubtype =
+      QueryIntegerProperty<PasswordsItemEntity>(_entities[2].properties[6]);
 }

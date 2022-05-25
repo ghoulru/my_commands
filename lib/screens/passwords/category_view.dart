@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:contextmenu/contextmenu.dart';
 import 'package:vertical_tabs/vertical_tabs.dart';
+import 'category_tab.dart';
+import 'package:logger/logger.dart';
+var logger = Logger();
 
 
 class CategoryView extends StatefulWidget {
@@ -11,24 +14,22 @@ class CategoryView extends StatefulWidget {
     Key? key,
     required this.categoryTabs,
     required this.categoryTabsController,
-    required this.doEditCategoryTab
+    required this.doEditCategoryTab,
+    // required this.tabs,
+    // required this.deleteCategory
   }) : super(key: key);
 
-  final List<Widget> categoryTabs;
+  final List<CategoryTab> categoryTabs;
   final dynamic categoryTabsController;
   final dynamic doEditCategoryTab;
+  // final dynamic tabs;
+  // final Function deleteCategory;
 
   @override
   State<CategoryView> createState() => CategoryViewState();
 }
 
 class CategoryViewState extends State<CategoryView> {
-  // CategoryViewState(
-  //     {Key? key,
-  //     required this.categoryTabs,
-  //     required this.categoryTabsController});
-
-
 
   @override
   void initState() {
@@ -39,9 +40,13 @@ class CategoryViewState extends State<CategoryView> {
   Widget build(BuildContext context) {
 
     final List<Widget> tabsContent = [];
-    widget.categoryTabs.forEach((tab) {
-      tabsContent.add(Text("my"));
-    });
+
+    for (var categoryTab in widget.categoryTabs) {
+      // logger.d(categoryTab.tab);
+
+      tabsContent.add(Text("tab content: " + categoryTab.tab.name));
+    }
+
 
     return Center(
        // child: Text('passwords passwords passwords passwords '),
