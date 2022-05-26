@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 class TextFieldPredefinedValues extends StatelessWidget {
   final Map<String, String> data;
-  final TextEditingController controller;
+  // final TextEditingController controller;
+  final Function onClick;
 
   const TextFieldPredefinedValues({
     Key? key,
     required this.data,
-    required this.controller,
+    required this.onClick,
   }) : super(key: key);
 
   @override
@@ -18,7 +19,8 @@ class TextFieldPredefinedValues extends StatelessWidget {
       datalist.add(GestureDetector(
         key: ObjectKey(key),
         onTap: () {
-          controller.text = value;
+          // controller.text = value;
+          onClick(key, value);
         },
         child: Text(value,
             style: TextStyle(

@@ -1,7 +1,6 @@
 // import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:my_commands/screens/passwords/models.dart';
 import 'package:process_run/shell.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
@@ -39,7 +38,7 @@ Future<void> main() async {
     // Set to frameless window
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
-    await windowManager.setSize(Size(1200, 800));
+    await windowManager.setSize(Size(900, 1000));
     await windowManager.center();
     await windowManager.show();
     // await windowManager.hide();

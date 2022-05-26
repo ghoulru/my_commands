@@ -63,4 +63,8 @@ class PasswordsItemEntity {
     assert(PasswordsItemEntitySubtype.url.index == 1);
   }
 
+  @override
+  String toString() {
+    return "$id / type=$type / subtype=$subtype / name=$name / value=$value / sort=$sort";
+  }
 }

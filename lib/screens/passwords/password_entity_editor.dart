@@ -1,9 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:my_commands/utils/text_field_predefined_values.dart';
 import 'models.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
+// import 'package:rflutter_alert/rflutter_alert.dart';
 
 var logger = Logger();
 
@@ -37,14 +39,18 @@ const Map<String, String> entryNames = {
 
 class PasswordEntityEditor extends StatefulWidget {
   final PasswordsItemEntity? data;
-  // final PasswordsItem parent;
+  final Function onSave;
+  final Function onClose;
+  final PasswordsItem? parent;
 
 
 
   const PasswordEntityEditor({
     Key? key,
     required this.data,
-    // required this.parent
+    required this.onSave,
+    required this.onClose,
+    this.parent,
   }) : super(key: key);
 
   @override
@@ -55,8 +61,10 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
   final _formKey = GlobalKey<FormState>();
 
   late String _type;
+  late PasswordsItemEntitySubtype _subtype;
   late String _name;
   late String _value;
+  late int _sort;
 
   final _nameController = TextEditingController();
   final _valueController = TextEditingController();
@@ -65,9 +73,11 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
   void initState() {
     super.initState();
 
-    _type = 'entry';
+    _type = widget.data?.type ?? 'entry';
+    _subtype = PasswordsItemEntitySubtype.string;
     _name = widget.data?.name ?? '';
     _value = widget.data?.value ?? '';
+    _sort = widget.data?.sort ?? 0;
 
     // _nameController.addListener((){
     //   logger.d(_nameController.text);
@@ -84,6 +94,7 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
   Widget build(BuildContext context) {
 
     // final bool editable = widget.editable;
+    // logger.d('sort in build=' + _sort.toString());
 
     final List<DropdownMenuItem<String>> eTypes = [];
     entityTypes.forEach((String key, String value) {
@@ -106,6 +117,11 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
               onChanged: (String? val) {
                 setState(() {
                   _type = val ?? 'entry';
+                  _subtype = PasswordsItemEntitySubtype.string;
+                  _name = '';
+                  _value = '';
+                  _nameController.text = '';
+                  _valueController.text = '';
                 });
               },
               items: eTypes
@@ -121,9 +137,10 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
     if (_type == 'title' || _type == 'entry') {
       fields.add(
         TextFormField(
-          // initialValue: _name,
+          // key: UniqueKey(),
           controller: _nameController,
           validator: (value) {
+            // logger.w(value, 'name validate');
             if (value == null || value.isEmpty) {
               return 'Не заполнено';
             }
@@ -136,20 +153,45 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
         ),
       );
 
-      if (_type == 'entry') fields.add(TextFieldPredefinedValues(data: entryNames, controller: _nameController));
-      if (_type == 'title') fields.add(TextFieldPredefinedValues(data: titles, controller: _nameController));
+      if (_type == 'entry') {
+        fields.add(TextFieldPredefinedValues(
+            key: UniqueKey(),
+            data: entryNames,
+            onClick: (String key, String value) {
+              _nameController.text = value;
+
+              setState(() {
+                _subtype = key == 'url'
+                    ? PasswordsItemEntitySubtype.url
+                    : PasswordsItemEntitySubtype.string;
+              });
+
+            }),
+        );
+      }
+      if (_type == 'title') {
+        fields.add(TextFieldPredefinedValues(
+          key: UniqueKey(),
+          data: titles,
+          onClick: (String key, String value) {
+            _nameController.text = value;
+          },
+        ));
+      }
+
     }
     // VALUE
     if (_type == 'spacer' || _type == 'entry') {
       fields.add(
         TextFormField(
-          // initialValue: _name,
+          // key: UniqueKey(),
           controller: _valueController,
           validator: (value) {
+            logger.w(value, 'value validate');
             if (value == null || value.isEmpty) {
               return 'Не заполнено';
             }
-            _name = value.trim();
+            _value = value.trim();
             return null;
           },
           decoration: InputDecoration(
@@ -159,34 +201,76 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
       );
     }
 
+    fields.add(
+      TextFormField(
+        // key: UniqueKey(),
+        initialValue: _sort.toString(),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Не заполнено';
+          }
+          int s;
+          try {
+            s = int.parse(value.trim());
+          }
+          catch(ex) {
+            s = 0;
+          }
+          _sort = s;
+          // setState(() {
+          //   _sort = s;
+          // });
+          // print("_sort =" + _sort.toString());
+          return null;
+        },
+        decoration: const InputDecoration(
+          labelText: 'Порядок сортировки (0 и более)',
+        ),
+      ),
+    );
+
+
+
     fields.addAll([
       const SizedBox(height: 20.0),
         Row(
           children: [
             ElevatedButton(
               onPressed: () {
+                print('entity try save');
                 if (_formKey.currentState!.validate()) {
+                  print(' - ok');
+                  final entity = PasswordsItemEntity()
+                    ..type = _type
+                    ..subtype = _subtype
+                    ..name = _name
+                    ..value = _value
+                    ..sort = _sort;
+                  debugPrint('ent editor save>>>>');
+                  // debugPrint(_type);
+                  // print(_subtype);
+                  // debugPrint(_name);
+                  // debugPrint(_value);
+                  logger.d(entity);
 
-                  // widget.onSave();
+                  widget.onSave(entity);
                 }
+                else
+                  print(' but cant');
               },
               child: const Text('Сохранить'),
             ),
             const SizedBox(width: 20.0),
             ElevatedButton(
               onPressed: () {
-                // widget.onClose(currentTabId: widget.category.id);
+                widget.onClose();
               },
               child: const Text('Закрыть'),
             ),
 
           ],
         )
-   ] );
-
-
-
-
+   ]);
 
     return Container(
         padding: EdgeInsets.all(10.0),
@@ -194,11 +278,6 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
           key: _formKey,
           child: Column(
             children: fields
-
-
-
-
-
           ),
         )
     );

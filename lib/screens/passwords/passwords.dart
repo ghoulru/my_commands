@@ -131,7 +131,8 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
           category: category,
           onSave: saveItem,
           onClose: showTabs,
-          editable: true
+          editable: true,
+          store: widget.store
       );
     });
   }
@@ -141,7 +142,6 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    // print("init state PasswordsState");
     super.initState();
 
     showTabs();

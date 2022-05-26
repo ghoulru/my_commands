@@ -76,7 +76,7 @@ class CategoryEditorState extends State<CategoryEditor> {
                   return null;
                 },
                 decoration: const InputDecoration(
-                  labelText: 'Порядковый номер*',
+                  labelText: 'Порядок сортировки (0 и более)*',
                 ),
               ),
               const SizedBox(height: 20.0),
