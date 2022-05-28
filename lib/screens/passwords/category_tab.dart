@@ -7,7 +7,7 @@ var logger = Logger();
 
 class CategoryTab extends StatelessWidget {
 
-  CategoryTab({
+  const CategoryTab({
     Key? key,
     required this.tab,
     required this.onEdit,
@@ -15,7 +15,7 @@ class CategoryTab extends StatelessWidget {
     required this.onAddItem,
   }) : super(key: key);
 
-  CategoryTabModel tab;
+  final CategoryTabModel tab;
   final Function onEdit;
   final Function onDelete;
   final Function onAddItem;
@@ -83,7 +83,7 @@ class CategoryTab extends StatelessWidget {
             // Text('tab')
           Row(
             children: [
-              Text(tab.id.toString()),
+              // Text(tab.id.toString()),
               Text(tab.name),
               const SizedBox(width: 5.0),
               Text(

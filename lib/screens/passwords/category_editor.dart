@@ -31,15 +31,11 @@ class CategoryEditorState extends State<CategoryEditor> {
     _id = widget.category?.id ?? 0;
     _name = widget.category?.name ?? '';
     _sort = widget.category?.sort ?? 0;
-
-    print(_id);
   }
 
   @override
   Widget build(BuildContext context) {
-    // return Text('CategoryEditor');
-    print("CategoryEditorState  build");
-    print(widget.category?.id);
+
 
     // https://flutter.su/tutorial/4-forma-vvoda-proverka
     return Container(

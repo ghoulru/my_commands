@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:vertical_tabs/vertical_tabs.dart';
+import 'package:my_commands/utils/styles.dart';
+// import 'package:vertical_tabs/vertical_tabs.dart';
 import 'models.dart';
 import 'category_view.dart';
 import 'category_tab.dart';
 import 'category_editor.dart';
 import 'password_item_editor.dart';
-
 // import '../../objectbox.dart';
 import 'package:my_commands/objectbox.g.dart';
 import 'package:logger/logger.dart';
@@ -41,12 +41,7 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
   late List<CategoryTab> _categoryTabs;
   late TabController _categoryTabsController;
 
-
-  Widget view = const Center(
-        child: CircularProgressIndicator(
-          value: null,
-          strokeWidth: 7.0,
-        ));
+  Widget view = loader;
 
   void doEditCategoryTab(int id) {
     debugPrint('doEditCategoryTab ' + id.toString());
@@ -56,16 +51,33 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     });
   }
 
-  //{int currentTabId = 0}
-  void showTabs({int currentTabId = 0}) {
-    final tabs = widget.categoryTabsBox.getAll();
+  //запоминаем выбранный сайт для каждой вкладки
+  late Map<int, int> activeTabAndItem = {};
 
-    // List<Widget> ct = [];
+  void setActiveTabAndItem({required int tabId, required int siteIndex}) {
+    logger.d(siteIndex, 'setActiveTabAndItem ' + tabId.toString());
+    Map<int,int> atai = {...activeTabAndItem};
+    atai[ tabId ] = siteIndex;
+    logger.d(atai);
+
+    WidgetsBinding.instance!.addPostFrameCallback((_){
+      setState(() {
+        activeTabAndItem = atai;
+      });
+    });
+
+  }
+
+  //{int currentTabId = 0}
+  List showTabs({int currentTabId = 0}) {
+    final List tabs = widget.categoryTabsBox.getAll();
+
     List<CategoryTab> ct = [];
 
     //sort tabs
     tabs.sort((a, b) => a.sort.compareTo(b.sort));
 
+    late CategoryTabModel currentTab;
     int tabIndex = 0;
     int i = 0;
     for (CategoryTabModel tab in tabs) {
@@ -77,21 +89,35 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
           onAddItem: showItemEditor)
       );
 
-      if (tab.id == currentTabId) tabIndex = i;
+      if (tab.id == currentTabId) {
+        tabIndex = i;
+        currentTab = tab;
+      }
       i++;
+
+
     }
 
     _categoryTabs = ct;
     _categoryTabsController = TabController(vsync: this, length: ct.length, initialIndex: tabIndex);
 
+
     setState(() {
       view = CategoryView(
           categoryTabs: _categoryTabs,
           categoryTabsController: _categoryTabsController,
-          doEditCategoryTab: doEditCategoryTab
+          doEditCategoryTab: doEditCategoryTab,
+          store: widget.store,
+          tabs: tabs,
+          showItemEditor: showItemEditor,
+          activeTabAndItem: activeTabAndItem,
+          setActiveTabAndItem: setActiveTabAndItem,
       );
     });
+
+    return tabs;
   }
+
 
   void saveCategory({
     required int? id,
@@ -122,12 +148,19 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
   }
 
   void showItemEditor({required int id, required CategoryTabModel category}) {
-    logger.i('showItemEditor ' + id.toString());
+    // logger.i('showItemEditor ' + id.toString());
     // logger.i(category.toString());
+
+    PasswordsItem? item;
+    if (id != 0) {
+      item = widget.passwordsItemsBox.get(id);
+    } else {
+      item = null;
+    }
 
     setState(() {
       view = PasswordItemEditor(
-          data: null,
+          data: item,
           category: category,
           onSave: saveItem,
           onClose: showTabs,
@@ -136,15 +169,24 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
       );
     });
   }
-  void saveItem(data) {
-    logger.d(data);
+  void saveItem(data, category) {
+    logger.d(data, 'save  site passwords');
+
+    final itemId = widget.passwordsItemsBox.put(data);
+
+    logger.d(itemId);
+    showTabs(currentTabId: category.id);
   }
 
   @override
   void initState() {
     super.initState();
 
-    showTabs();
+    List tabs = showTabs();
+
+    for (CategoryTabModel tab in tabs) {
+      activeTabAndItem[ tab.id ] = 0;
+    }
   }
   @override
   void dispose() {
@@ -153,11 +195,7 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // debugPrint("--passwords build--");
-    // print(objectbox);
-    // debugPrint(_categoryTabs.length.toString());
-    // debugPrint("view type");
-    // print(view.runtimeType);
+
     return view;
     return const Center(
       child: Text('passwords passwords passwords passwords '),

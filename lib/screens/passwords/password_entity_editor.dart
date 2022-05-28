@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:my_commands/utils/text_field_predefined_values.dart';
 import 'models.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter/cupertino.dart';
-// import 'package:rflutter_alert/rflutter_alert.dart';
+
 
 var logger = Logger();
 
@@ -24,11 +22,9 @@ const Map<String, String> titles = {
   "admin": "Панель администрирования",
   "ftp": "FTP",
   "ftpssh": "FTP/SSH",
+  "ssh": "SSH",
   "db": "DB",
-  // "admin1": "Панель администрирования 111",
-  // "ftp1": "FTP 11",
-  // "ftpssh1": "FTP/SSH 111",
-  // "db1": "DB 11",
+  "hostpanel": "Панель хостинга",
 };
 
 const Map<String, String> entryNames = {
@@ -42,14 +38,14 @@ class PasswordEntityEditor extends StatefulWidget {
   final Function onSave;
   final Function onClose;
   final PasswordsItem? parent;
-
-
+  // final int sort;
 
   const PasswordEntityEditor({
     Key? key,
     required this.data,
     required this.onSave,
     required this.onClose,
+    // required this.sort,
     this.parent,
   }) : super(key: key);
 
@@ -79,6 +75,10 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
     _value = widget.data?.value ?? '';
     _sort = widget.data?.sort ?? 0;
 
+    _nameController.text = _name;
+    _valueController.text = _value;
+
+    logger.d(widget.data);
     // _nameController.addListener((){
     //   logger.d(_nameController.text);
     // });
@@ -217,10 +217,7 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
             s = 0;
           }
           _sort = s;
-          // setState(() {
-          //   _sort = s;
-          // });
-          // print("_sort =" + _sort.toString());
+
           return null;
         },
         decoration: const InputDecoration(
@@ -237,26 +234,27 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
           children: [
             ElevatedButton(
               onPressed: () {
-                print('entity try save');
+
                 if (_formKey.currentState!.validate()) {
-                  print(' - ok');
+
                   final entity = PasswordsItemEntity()
+                    ..id = widget.data?.id ?? 0
                     ..type = _type
                     ..subtype = _subtype
                     ..name = _name
                     ..value = _value
                     ..sort = _sort;
-                  debugPrint('ent editor save>>>>');
+                  // debugPrint('ent editor save>>>>');
                   // debugPrint(_type);
                   // print(_subtype);
                   // debugPrint(_name);
                   // debugPrint(_value);
-                  logger.d(entity);
+                  // logger.d(entity);
 
                   widget.onSave(entity);
                 }
-                else
-                  print(' but cant');
+                // else
+                //   print(' but cant');
               },
               child: const Text('Сохранить'),
             ),
@@ -282,4 +280,5 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
         )
     );
   }
+
 }
