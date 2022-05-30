@@ -33,7 +33,7 @@ class CopyFiles {
         "AnalysisForm.tsx",
     ));
 
-    print(copyFiles);
+    // print(copyFiles);
   }
 
 }
@@ -74,7 +74,7 @@ class TeploinformFormState extends State<TeploinformForm> {
 
 
     return Padding(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Form(
           key: _formKey,
           child: Column(
@@ -89,7 +89,7 @@ class TeploinformFormState extends State<TeploinformForm> {
                 },
                 maxLines: 8,
                 // expands: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Пути к файлам, через перевод строки',
                   contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
                   border: OutlineInputBorder(

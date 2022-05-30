@@ -1,23 +1,20 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:my_commands/utils/styles.dart';
-// import 'package:vertical_tabs/vertical_tabs.dart';
 import 'models.dart';
 import 'category_view.dart';
 import 'category_tab.dart';
 import 'category_editor.dart';
 import 'password_item_editor.dart';
-// import '../../objectbox.dart';
 import 'package:my_commands/objectbox.g.dart';
 import 'package:logger/logger.dart';
 
 var logger = Logger();
 
-/**
- * Как сохранить состояние при переключении табов
- * https://blog.logrocket.com/flutter-tabbar-a-complete-tutorial-with-examples/#preservingthestateoftabs
- *
- */
+/// Как сохранить состояние при переключении табов
+/// https://blog.logrocket.com/flutter-tabbar-a-complete-tutorial-with-examples/#preservingthestateoftabs
+///
+/// TODO поле с путем до логотипа, и выводить лого  рядом с названием
+/// TODO открытие инфы о всех дотуспах к сату в новом окне, т.е. это запуск нового приложения
 class Passwords extends StatefulWidget {
   final Store store;
   late final Box categoryTabsBox;
@@ -60,11 +57,12 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     atai[ tabId ] = siteIndex;
     logger.d(atai);
 
-    WidgetsBinding.instance!.addPostFrameCallback((_){
-      setState(() {
-        activeTabAndItem = atai;
-      });
-    });
+    // WidgetsBinding.instance!.addPostFrameCallback((_){
+    //   logger.d('setState activeTabAndItem');
+    //   setState(() {
+    //     activeTabAndItem = atai;
+    //   });
+    // });
 
   }
 
@@ -77,7 +75,7 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     //sort tabs
     tabs.sort((a, b) => a.sort.compareTo(b.sort));
 
-    late CategoryTabModel currentTab;
+    // late CategoryTabModel currentTab;
     int tabIndex = 0;
     int i = 0;
     for (CategoryTabModel tab in tabs) {
@@ -91,11 +89,9 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
 
       if (tab.id == currentTabId) {
         tabIndex = i;
-        currentTab = tab;
+        // currentTab = tab;
       }
       i++;
-
-
     }
 
     _categoryTabs = ct;
@@ -110,8 +106,8 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
           store: widget.store,
           tabs: tabs,
           showItemEditor: showItemEditor,
-          activeTabAndItem: activeTabAndItem,
-          setActiveTabAndItem: setActiveTabAndItem,
+          // activeTabAndItem: activeTabAndItem,
+          // setActiveTabAndItem: setActiveTabAndItem,
       );
     });
 
@@ -147,7 +143,7 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     showTabs();
   }
 
-  void showItemEditor({required int id, required CategoryTabModel category}) {
+  void showItemEditor({required int id, required CategoryTabModel category, int index = 0}) {
     // logger.i('showItemEditor ' + id.toString());
     // logger.i(category.toString());
 
@@ -165,11 +161,12 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
           onSave: saveItem,
           onClose: showTabs,
           editable: true,
-          store: widget.store
+          store: widget.store,
+          tabIndex: index
       );
     });
   }
-  void saveItem(data, category) {
+  void saveItem(data, category, itemTabIndex) {
     logger.d(data, 'save  site passwords');
 
     final itemId = widget.passwordsItemsBox.put(data);
@@ -182,11 +179,15 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    List tabs = showTabs();
+    showTabs();
 
-    for (CategoryTabModel tab in tabs) {
-      activeTabAndItem[ tab.id ] = 0;
-    }
+    // List tabs = showTabs();
+    //
+    // for (CategoryTabModel tab in tabs) {
+    //   activeTabAndItem[ tab.id ] = 0;
+    // }
+
+
   }
   @override
   void dispose() {

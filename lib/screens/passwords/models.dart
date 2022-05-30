@@ -25,6 +25,8 @@ class PasswordsItem {
   int id = 0;
   String name = '';
 
+  String logoURL = '';
+
   final category = ToOne<CategoryTabModel>();
 
   @Backlink()
@@ -32,7 +34,7 @@ class PasswordsItem {
 
   @override
   String toString() {
-    return "$id / name=$name / entitiesLength = "+ entities.length.toString();
+    return "$id / name=$name / logo=$logoURL / entitiesLength = "+ entities.length.toString();
   }
 }
 

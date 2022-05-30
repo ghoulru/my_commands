@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:my_commands/utils/text_field_predefined_values.dart';
 import 'models.dart';
 import 'package:logger/logger.dart';
-import 'package:flutter/cupertino.dart';
 
 
 var logger = Logger();
@@ -271,7 +270,7 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
    ]);
 
     return Container(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: Form(
           key: _formKey,
           child: Column(

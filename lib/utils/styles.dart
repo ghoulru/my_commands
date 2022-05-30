@@ -38,9 +38,9 @@ class TextHeader extends StatelessWidget {
         fontStyle = FontStyle.italic;
         fontWeight =  FontWeight.w300;
         break;
-      // default:
-      //   fontSize = 18.0;
-      //   break;
+      default:
+        fontSize = 18.0;
+        break;
     }
 
     return Text(

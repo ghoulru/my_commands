@@ -21,7 +21,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(1, 2675329927980441605),
       name: 'CategoryTabModel',
-      lastPropertyId: const IdUid(3, 7034692668164663745),
+      lastPropertyId: const IdUid(4, 7132167263085717422),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -48,7 +48,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(2, 543114357366806874),
       name: 'PasswordsItem',
-      lastPropertyId: const IdUid(3, 510973918699378807),
+      lastPropertyId: const IdUid(5, 5931301753955464919),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -67,7 +67,12 @@ final _entities = <ModelEntity>[
             type: 11,
             flags: 520,
             indexId: const IdUid(1, 8654647992541905420),
-            relationTarget: 'CategoryTabModel')
+            relationTarget: 'CategoryTabModel'),
+        ModelProperty(
+            id: const IdUid(5, 5931301753955464919),
+            name: 'logoURL',
+            type: 9,
+            flags: 0)
       ],
       relations: <ModelRelation>[],
       backlinks: <ModelBacklink>[
@@ -148,7 +153,7 @@ ModelDefinition getObjectBoxModel() {
       lastSequenceId: const IdUid(0, 0),
       retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [],
+      retiredPropertyUids: const [7132167263085717422, 4161909897645843204],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -168,7 +173,7 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (CategoryTabModel object, fb.Builder fbb) {
           final nameOffset = fbb.writeString(object.name);
-          fbb.startTable(4);
+          fbb.startTable(5);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, nameOffset);
           fbb.addInt64(2, object.sort);
@@ -206,10 +211,12 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (PasswordsItem object, fb.Builder fbb) {
           final nameOffset = fbb.writeString(object.name);
-          fbb.startTable(4);
+          final logoURLOffset = fbb.writeString(object.logoURL);
+          fbb.startTable(6);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, nameOffset);
           fbb.addInt64(2, object.category.targetId);
+          fbb.addOffset(4, logoURLOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -220,7 +227,9 @@ ModelDefinition getObjectBoxModel() {
           final object = PasswordsItem()
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
             ..name = const fb.StringReader(asciiOptimization: true)
-                .vTableGet(buffer, rootOffset, 6, '');
+                .vTableGet(buffer, rootOffset, 6, '')
+            ..logoURL = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 12, '');
           object.category.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
           object.category.attach(store);
@@ -308,6 +317,10 @@ class PasswordsItem_ {
   /// see [PasswordsItem.category]
   static final category = QueryRelationToOne<PasswordsItem, CategoryTabModel>(
       _entities[1].properties[2]);
+
+  /// see [PasswordsItem.logoURL]
+  static final logoURL =
+      QueryStringProperty<PasswordsItem>(_entities[1].properties[3]);
 }
 
 /// [PasswordsItemEntity] entity fields to define ObjectBox queries.

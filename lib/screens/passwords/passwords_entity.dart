@@ -5,7 +5,7 @@ import 'package:my_commands/utils/styles.dart';
 import 'models.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'password_entity_editor.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
+// import 'package:rflutter_alert/rflutter_alert.dart';
 
 class PasswordsEntity extends StatelessWidget {
   final PasswordsItemEntity data;

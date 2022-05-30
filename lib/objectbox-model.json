@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:2675329927980441605",
-      "lastPropertyId": "3:7034692668164663745",
+      "lastPropertyId": "4:7132167263085717422",
       "name": "CategoryTabModel",
       "properties": [
         {
@@ -31,7 +31,7 @@
     },
     {
       "id": "2:543114357366806874",
-      "lastPropertyId": "3:510973918699378807",
+      "lastPropertyId": "5:5931301753955464919",
       "name": "PasswordsItem",
       "properties": [
         {
@@ -52,6 +52,11 @@
           "flags": 520,
           "indexId": "1:8654647992541905420",
           "relationTarget": "CategoryTabModel"
+        },
+        {
+          "id": "5:5931301753955464919",
+          "name": "logoURL",
+          "type": 9
         }
       ],
       "relations": []
@@ -112,7 +117,10 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    7132167263085717422,
+    4161909897645843204
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

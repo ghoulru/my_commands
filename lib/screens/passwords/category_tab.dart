@@ -78,7 +78,7 @@ class CategoryTab extends StatelessWidget {
         width: 300,
         // child: Text(title)
         child: Padding(
-          padding: EdgeInsets.only(left: 8, right: 15, top: 10, bottom: 10),
+          padding: const EdgeInsets.only(left: 8, right: 15, top: 10, bottom: 10),
           child:
             // Text('tab')
           Row(

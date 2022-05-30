@@ -39,7 +39,7 @@ class CategoryEditorState extends State<CategoryEditor> {
 
     // https://flutter.su/tutorial/4-forma-vvoda-proverka
     return Container(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: Form(
           key: _formKey,
           child: Column(

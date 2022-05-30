@@ -6,7 +6,6 @@ import 'models.dart';
 import 'password_entity_editor.dart';
 import 'passwords_entity.dart';
 
-
 var logger = Logger();
 
 class PasswordItemEditor extends StatefulWidget {
@@ -16,6 +15,7 @@ class PasswordItemEditor extends StatefulWidget {
   final Function onClose;
   final bool editable;
   final Store store;
+  final int tabIndex; //индекс во вкладках
 
   const PasswordItemEditor({
     Key? key,
@@ -25,6 +25,7 @@ class PasswordItemEditor extends StatefulWidget {
     required this.onClose,
     required this.editable,
     required this.store,
+    this.tabIndex = 0,
   }) : super(key: key);
 
   @override
@@ -35,8 +36,10 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
   final _formKey = GlobalKey<FormState>();
   late int _id;
   late String _name;
+  late String _logoURL;
 
   late List<PasswordsItemEntity> _entities;
+
   // late Set<PasswordsItemEntity> _entities;
 
   @override
@@ -45,6 +48,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
 
     _id = widget.data?.id ?? 0;
     _name = widget.data?.name ?? '';
+    _logoURL = widget.data?.logoURL ?? '';
     _entities = widget.data?.entities ?? [];
     // if (widget.data?.entities.isNotEmpty)
     // _entities = [];
@@ -52,7 +56,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
 
   @override
   Widget build(BuildContext context) {
-    logger.d(widget.category);
+    // logger.d(widget.tabIndex);
 
     final bool editable = widget.editable;
 
@@ -60,17 +64,17 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
       ElevatedButton(
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-
             final item = PasswordsItem()
               ..id = _id
-              ..name = _name;
+              ..name = _name
+              ..logoURL = _logoURL;
 
             item.category.target = widget.category;
             item.entities.addAll(_entities);
 
-            // logger.d('onPressed save passwords item', item);
+            logger.d(item, 'onPressed save passwords item');
 
-            widget.onSave(item, widget.category);
+            widget.onSave(item, widget.category, widget.tabIndex);
           }
         },
         child: const Text('Сохранить'),
@@ -84,38 +88,24 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
           style: ElevatedButton.styleFrom(primary: Colors.grey[400])),
     ];
 
-    // Widget entityEditor = PasswordEntityEditor(
-    //     data: null,
-    //     onSave: _onEntitySave,
-    //     onClose: widget.onClose(currentTabId: widget.category.id)
-    // );
-
-    // final entitiesWidgets = Column(
-    //   children: [],
-    // );
-
     _entities.sort((a, b) => a.sort.compareTo(b.sort));
     List<Widget> entitiesList = [];
-    for(PasswordsItemEntity entity in _entities) {
-      entitiesList.add(
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(entity.sort.toString(), style: TextStyle(color: Colors.grey[300])),
-              const SizedBox(width: 10.0),
-              Expanded(
-                flex: 1,
-                child: PasswordsEntity(
-                    key: UniqueKey(),
-                    data: entity,
-                    onEdit: _onEditEntity,
-                    onDelete: _onEntityDelete
-                )
-              )
-
-            ],
-          )
-      );
+    for (PasswordsItemEntity entity in _entities) {
+      entitiesList.add(Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(entity.sort.toString(),
+              style: TextStyle(color: Colors.grey[300])),
+          const SizedBox(width: 10.0),
+          Expanded(
+              flex: 1,
+              child: PasswordsEntity(
+                  key: UniqueKey(),
+                  data: entity,
+                  onEdit: _onEditEntity,
+                  onDelete: _onEntityDelete))
+        ],
+      ));
     }
 
     return Container(
@@ -147,20 +137,19 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
                 ),
               ),
               const SizedBox(height: 20.0),
-              // Container(
-              //   child: ,
-              // ),
-              // Row(
-              //   children:
-              // ),
-              // Expanded(
-              //   flex: 1,
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: entitiesList,
-              //   ),
-              // ),
-            Column(
+              TextFormField(
+                // readOnly: !editable,
+                initialValue: _logoURL,
+                validator: (value) {
+                  _logoURL = value?.trim() ?? '';
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  labelText: 'URL логотипа/иконки',
+                ),
+              ),
+              const SizedBox(height: 20.0),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: entitiesList,
               ),
@@ -197,6 +186,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
   }
 
   late Alert alert;
+
   void _onEntitySave(PasswordsItemEntity entity, [bool delete = false]) {
     logger.d(entity, '_onEntitySave');
 
@@ -210,40 +200,36 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
         if (entitiesTmp[i].id == entity.id) {
           if (delete) {
             entitiesTmp.removeAt(i);
-          }
-          else {
+          } else {
             entitiesTmp[i] = entity;
           }
         }
-
       }
-    }
-    else {
+    } else {
       entitiesTmp.add(entity);
     }
 
     if (delete) {
-      widget.store.box<PasswordsItemEntity>()
-          .remove(entity.id);
+      widget.store.box<PasswordsItemEntity>().remove(entity.id);
     }
 
-    setState((){
+    setState(() {
       _entities = entitiesTmp;
     });
 
     // logger.d(alert.runtimeType);
     try {
       alert.dismiss();
-    } catch (ex){
+    } catch (ex) {
       // logger.e('try to dismiss alert');
     }
-
   }
 
   late Alert alertDelete;
-  void _onEntityDelete(PasswordsItemEntity entity) {
 
-    Widget btnText(String txt) => Text(txt, style: const TextStyle(color: Colors.white, fontSize: 16.0));
+  void _onEntityDelete(PasswordsItemEntity entity) {
+    Widget btnText(String txt) =>
+        Text(txt, style: const TextStyle(color: Colors.white, fontSize: 16.0));
 
     alertDelete = Alert(
       context: context,
@@ -275,7 +261,6 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
   }
 
   _onEditEntity([PasswordsItemEntity? entity]) {
-
     if (entity == null) {
       int lastSort = 0;
       if (_entities.isNotEmpty) {
@@ -284,8 +269,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
       }
       // logger.d(lastSort, 'lastSort');
 
-      entity = PasswordsItemEntity()
-        ..sort = lastSort;
+      entity = PasswordsItemEntity()..sort = lastSort;
     }
 
     alert = Alert(
@@ -303,6 +287,4 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
 
     alert.show();
   }
-
-
 }

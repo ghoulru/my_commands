@@ -1,10 +1,7 @@
-// import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide MenuItem;
 import 'package:process_run/shell.dart';
-import 'package:system_tray/system_tray.dart';
+import 'package:system_tray/system_tray.dart' as system_tray;
 import 'package:window_manager/window_manager.dart';
-import 'copyfiles.dart';
 import 'screens/passwords/passwords.dart';
 import 'objectbox.dart';
 
@@ -13,6 +10,7 @@ enum ScreenType {
   teplo,
 }
 
+// ignore: constant_identifier_names
 const bool DEBUG = true;
 
 late ObjectBox objectbox;
@@ -27,7 +25,7 @@ late ObjectBox objectbox;
  * работа с окном
  * https://github.com/leanflutter/window_manager
  *
- * TODO чтение/запись архива с паролями к сайтам, хранить наверное в БД дарта https://pub.dev/packages/objectbox
+ *
  *
  */
 Future<void> main() async {
@@ -38,7 +36,7 @@ Future<void> main() async {
     // Set to frameless window
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
-    await windowManager.setSize(Size(900, 1000));
+    await windowManager.setSize(const Size(900, 1000));
     await windowManager.center();
     await windowManager.show();
     // await windowManager.hide();
@@ -60,10 +58,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProviderStateMixin {
-  final SystemTray _systemTray = SystemTray();
-  final CopyFiles _copyFiles = CopyFiles();
-
-  // final AppWindow _appWindow = AppWindow();
+  final system_tray.SystemTray _systemTray = system_tray.SystemTray();
+  // final CopyFiles _copyFiles = CopyFiles();
 
   static const _nodeVersions = <String>['17.5.0', '16.14.0', '13.14.0'];
   String _currentNodeVersion = '';
@@ -89,7 +85,7 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
 
   @override
   void dispose() {
-    print('---main dispose---');
+    // print('---main dispose---');
     windowManager.removeListener(this);
     _mainTabsController.dispose();
     objectbox.store.close();
@@ -176,14 +172,19 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
   }
 
   getMenu() {
-    final nodeVersionsItems = <MenuItem>[];
-    _nodeVersions.forEach((v) => nodeVersionsItems.add(MenuItem(
-        label: v + (_currentNodeVersion == v ? " - current" : ""),
-        onClicked: () => changeNodeVersion(v),
-        enabled: _currentNodeVersion != v)));
+    final nodeVersionsItems = <system_tray.MenuItem>[];
+    for (String v in _nodeVersions) {
+      nodeVersionsItems.add(
+          system_tray.MenuItem(
+            label: v + (_currentNodeVersion == v ? " - current" : ""),
+            onClicked: () => changeNodeVersion(v),
+            enabled: _currentNodeVersion != v,
+          )
+      );
+    }
 
     final menu = [
-      SubMenu(label: 'Node.js версии', children: nodeVersionsItems),
+      system_tray.SubMenu(label: 'Node.js версии', children: nodeVersionsItems),
       // MenuItem(
       //     label: 'Закрыть',
       //     onClicked: () async {
@@ -194,10 +195,10 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
       // MenuItem(label: 'Show', onClicked: _appWindow.show),
       // MenuItem(label: 'Hide', onClicked: _appWindow.hide),
 
-      MenuSeparator(),
+      system_tray.MenuSeparator(),
       // MenuItem(label: 'Закрыть', onClicked: _appWindow.close),
-      MenuItem(
-          label: 'Закрыть',
+      system_tray.MenuItem(
+          label: 'Выход',
           onClicked: () async {
             await windowManager.setPreventClose(false);
             await windowManager.close();
@@ -250,7 +251,7 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(34.0),
+          preferredSize: const Size.fromHeight(34.0),
           child: AppBar(
             // title: const Text("Name"),
             elevation: 0,
@@ -261,7 +262,7 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
                 indicatorColor: Colors.black,
                 tabs: [
                   Tab(text: Passwords.title, height: 30),
-                  Tab(text: "Чето еще", height: 30),
+                  const Tab(text: "Чето еще", height: 30),
                 ]
             ),
           ),
@@ -270,7 +271,7 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
             controller: _mainTabsController,
             children: [
               Passwords(store: objectbox.store),
-              Text("sdfsdf")
+              const Text("Чето еще вывод")
             ]
         ),
         // body: const Center(
