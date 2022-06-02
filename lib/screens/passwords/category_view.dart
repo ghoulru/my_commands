@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-
-// import 'package:contextmenu/contextmenu.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:vertical_tabs/vertical_tabs.dart';
 import 'package:logger/logger.dart';
 import 'package:my_commands/objectbox.g.dart';
+import 'package:my_commands/utils/app_models.dart';
 import 'models.dart';
 import 'category_tab.dart';
 import 'passwords_item_view.dart';
@@ -38,7 +38,9 @@ class CategoryView extends StatefulWidget {
 }
 
 class CategoryViewState extends State<CategoryView> {
-  Map<int, int> activeTabAndItem = {};
+  late Map<int, int> activeTabAndItem = {};
+  late encrypt.Encrypter _encrypter;
+  late encrypt.IV _encrypterIV;
 
   @override
   void initState() {
@@ -53,6 +55,10 @@ class CategoryViewState extends State<CategoryView> {
     for (var tab in widget.tabs) {
       activeTabAndItem[tab.id] = 0;
     }
+
+    final key = encrypt.Key.fromUtf8(appEncryptSecretKey);
+    _encrypterIV = encrypt.IV.fromLength(appEncryptSecretKeyIV);
+    _encrypter = encrypt.Encrypter(encrypt.AES(key));
   }
 
   @override
@@ -161,7 +167,10 @@ class CategoryViewState extends State<CategoryView> {
               data: item,
               showItemEditor: widget.showItemEditor,
               category: category,
-              tabIndex: i++)));
+              tabIndex: i++,
+              encrypter: _encrypter,
+              encrypterIV: _encrypterIV,
+          )));
     }
     // logger.d(
     //     activeTabAndItem[category.id],
@@ -174,17 +183,17 @@ class CategoryViewState extends State<CategoryView> {
         contents: itemTabsContent,
         initialIndex: activeTabAndItem[category.id],
         onSelect: (index) {
-          logger.d(
-              index,
-              'VerticalTabs onSelect =' +
-                  activeTabAndItem[category.id].toString());
+          // logger.d(
+          //     index,
+          //     'VerticalTabs onSelect =' +
+          //         activeTabAndItem[category.id].toString());
 
           Map<int, int> atai = {...activeTabAndItem};
           atai[category.id] = index;
           logger.d(atai);
 
           WidgetsBinding.instance!.addPostFrameCallback((_) {
-            logger.d('setState activeTabAndItem');
+            // logger.d('setState activeTabAndItem');
             setState(() {
               activeTabAndItem = atai;
             });

@@ -107,10 +107,36 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "4:833190356009252074",
+      "lastPropertyId": "3:834553099565089482",
+      "name": "Settings",
+      "properties": [
+        {
+          "id": "1:5800481548970958660",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4615520900115945520",
+          "name": "name",
+          "type": 9,
+          "flags": 2080,
+          "indexId": "4:7104629174196498589"
+        },
+        {
+          "id": "3:834553099565089482",
+          "name": "value",
+          "type": 9
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "3:5617649913534481621",
-  "lastIndexId": "3:2973430421584005801",
+  "lastEntityId": "4:833190356009252074",
+  "lastIndexId": "4:7104629174196498589",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

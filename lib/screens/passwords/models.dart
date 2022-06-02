@@ -42,6 +42,7 @@ class PasswordsItem {
 enum PasswordsItemEntitySubtype {
   string,
   url,
+  password,
 }
 
 @Entity()
@@ -68,6 +69,7 @@ class PasswordsItemEntity {
   void _ensureStableEnumValues() {
     assert(PasswordsItemEntitySubtype.string.index == 0);
     assert(PasswordsItemEntitySubtype.url.index == 1);
+    assert(PasswordsItemEntitySubtype.password.index == 2);
   }
 
   @override

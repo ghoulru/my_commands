@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart' hide MenuItem;
 import 'package:process_run/shell.dart';
 import 'package:system_tray/system_tray.dart' as system_tray;
 import 'package:window_manager/window_manager.dart';
 import 'screens/passwords/passwords.dart';
 import 'objectbox.dart';
+// import 'objectbox.g.dart';
+// import 'utils/app_models.dart';
 
 enum ScreenType {
   passwords,
@@ -14,11 +18,13 @@ enum ScreenType {
 const bool DEBUG = true;
 
 late ObjectBox objectbox;
+late List<dynamic> settings;
 
 /*
  *
  * Билдим
- * flutter build windows
+ * flutter build windows --no-sound-null-safety
+ *  изза вертикальных табов
  *  создает пакет https://levelup.gitconnected.com/create-windows-apps-with-flutter-cd287c9a029c
  * flutter pub run msix:create
  *
@@ -32,18 +38,24 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
+  objectbox = await ObjectBox.create();
+  // final Box settingsBox = objectbox.store.box<Settings>();
+  // settings = settingsBox.getAll();
+
+
+
   WindowManager.instance.waitUntilReadyToShow().then((_) async {
     // Set to frameless window
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
-    await windowManager.setSize(const Size(900, 1000));
+    await windowManager.setSize(const Size(1200, 1000));
     await windowManager.center();
-    await windowManager.show();
-    // await windowManager.hide();
+    // await windowManager.show();
+    await windowManager.hide();
     // await windowManager.setSkipTaskbar(true);
   });
 
-  objectbox = await ObjectBox.create();
+
   // print("---main start---");
   // print(objectbox.store);
 
@@ -287,5 +299,13 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
     setState(() {});
     // do something
     // init();
+  }
+
+  @override
+  void onWindowResize() async {
+    Size sizes = await windowManager.getSize();
+    print(sizes.width);
+
+    // settingsBox.put()
   }
 }

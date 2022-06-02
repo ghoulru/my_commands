@@ -1,10 +1,13 @@
+import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:my_commands/objectbox.g.dart';
 import 'package:logger/logger.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'models.dart';
 import 'password_entity_editor.dart';
 import 'passwords_entity.dart';
+import 'package:my_commands/utils/app_models.dart';
 
 var logger = Logger();
 
@@ -39,8 +42,10 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
   late String _logoURL;
 
   late List<PasswordsItemEntity> _entities;
+  late Map<Key, PasswordsItemEntity> _entitiesSet;
 
-  // late Set<PasswordsItemEntity> _entities;
+  late encrypt.Encrypter _encrypter;
+  late encrypt.IV _encrypterIV;
 
   @override
   void initState() {
@@ -50,8 +55,17 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
     _name = widget.data?.name ?? '';
     _logoURL = widget.data?.logoURL ?? '';
     _entities = widget.data?.entities ?? [];
-    // if (widget.data?.entities.isNotEmpty)
-    // _entities = [];
+    _entitiesSet = {};
+    if (_entities.isNotEmpty) {
+      for (PasswordsItemEntity entity in _entities) {
+        _entitiesSet[UniqueKey()] = entity;
+      }
+    }
+
+    final key = encrypt.Key.fromUtf8(appEncryptSecretKey);
+    _encrypterIV = encrypt.IV.fromLength(appEncryptSecretKeyIV);
+    _encrypter = encrypt.Encrypter(encrypt.AES(key));
+
   }
 
   @override
@@ -89,24 +103,61 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
     ];
 
     _entities.sort((a, b) => a.sort.compareTo(b.sort));
+
     List<Widget> entitiesList = [];
-    for (PasswordsItemEntity entity in _entities) {
+    // for (PasswordsItemEntity entity in _entities) {
+    //   entitiesList.add(Row(
+    //     key: UniqueKey(),
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: [
+    //       Text(entity.sort.toString(),
+    //           style: TextStyle(color: Colors.grey[300])),
+    //       const SizedBox(width: 10.0),
+    //       Expanded(
+    //           flex: 1,
+    //           child: PasswordsEntity(
+    //               key: UniqueKey(),
+    //               data: entity,
+    //               onEdit: _entityEditor,
+    //               onDelete: _onEntityDelete))
+    //     ],
+    //   ));
+    // }
+    // final key = encrypt.Key.fromUtf8(appEncryptSecretKey);
+    // final iv = encrypt.IV.fromLength(appEncryptSecretKeyIV);
+    // logger.d(key.runtimeType);
+    // final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+    final entitiesSetSorted =
+        SplayTreeMap<Key, dynamic>.from(_entitiesSet, (a, b) {
+      int aSort = _entitiesSet[a]?.sort ?? 0;
+      int bSort = _entitiesSet[b]?.sort ?? 0;
+      return aSort > bSort ? 1 : -1;
+    });
+    // logger.d(_entitiesSetSorted, '_entitiesSetSorted');
+
+    entitiesSetSorted.forEach((key, entity) {
       entitiesList.add(Row(
+        key: UniqueKey(),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(entity.sort.toString(),
               style: TextStyle(color: Colors.grey[300])),
           const SizedBox(width: 10.0),
           Expanded(
-              flex: 1,
-              child: PasswordsEntity(
-                  key: UniqueKey(),
-                  data: entity,
-                  onEdit: _onEditEntity,
-                  onDelete: _onEntityDelete))
+            flex: 1,
+            child: PasswordsEntity(
+              key: key,
+              data: entity,
+              onEdit: _entityEditor,
+              onDelete: _onEntityDelete,
+              encrypter: _encrypter,
+              encrypterIV: _encrypterIV,
+            ),
+          )
         ],
       ));
-    }
+    });
 
     return Container(
         padding: const EdgeInsets.all(10.0),
@@ -118,10 +169,10 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
               Text(widget.category.name +
                   ': ' +
                   (_id == 0 ? 'Добавление паролей' : 'Редактирование паролей')),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: buttons,
-              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.end,
+              //   children: buttons,
+              // ),
               TextFormField(
                 readOnly: !editable,
                 initialValue: _name,
@@ -149,9 +200,18 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
                 ),
               ),
               const SizedBox(height: 20.0),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: entitiesList,
+              Expanded(
+                flex: 1,
+                child: SingleChildScrollView(
+                  primary: false,
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      // children: [
+                      //   ...entitiesList,
+
+                      // ]
+                      children: entitiesList),
+                ),
               ),
               const SizedBox(height: 20.0),
               IconButton(
@@ -159,22 +219,9 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
                 icon: const Icon(Icons.add),
                 onPressed: () {
                   // print("Добавить запись/заголовок/разделитель");
-                  _onEditEntity();
+                  _entityEditor(UniqueKey(), null);
                 },
               ),
-
-              /*
-              PasswordEntityEditor(
-                  data: null,
-                  // parent: widget.data,
-                  onSave: _onEntitySave,
-                  onClose: () {
-                    logger.w('close ent editor');
-
-                    // widget.onClose(currentTabId: widget.category.id);
-                  }),
-              */
-
               const SizedBox(height: 20.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -187,8 +234,36 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
 
   late Alert alert;
 
-  void _onEntitySave(PasswordsItemEntity entity, [bool delete = false]) {
-    logger.d(entity, '_onEntitySave');
+  void _onEntitySave(PasswordsItemEntity entity, Key entityKey,
+      [bool delete = false]) {
+    logger.d(entity, '_onEntitySave ' + entityKey.toString());
+
+    // _entitiesSet[ entityKey ] = entity
+    Map<Key, PasswordsItemEntity> newSet = {..._entitiesSet};
+    if (delete) {
+      newSet.remove(entityKey);
+      widget.store.box<PasswordsItemEntity>().remove(entity.id);
+    } else {
+      newSet[entityKey] = entity;
+    }
+    List<PasswordsItemEntity> newEntities = [];
+    newSet.forEach((key, value) => newEntities.add(value));
+
+    setState(() {
+      _entitiesSet = newSet;
+      _entities = newEntities;
+    });
+
+    // logger.d(alert.runtimeType);
+    try {
+      alert.dismiss();
+    } catch (ex) {
+      1;
+    }
+  }
+
+  void _onEntitySaveOld(PasswordsItemEntity entity, [bool delete = false]) {
+    logger.d(entity, '_onEntitySave ');
 
     logger.d(entity);
     List<PasswordsItemEntity> entitiesTmp = [..._entities];
@@ -227,7 +302,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
 
   late Alert alertDelete;
 
-  void _onEntityDelete(PasswordsItemEntity entity) {
+  void _onEntityDelete(PasswordsItemEntity entity, Key key) {
     Widget btnText(String txt) =>
         Text(txt, style: const TextStyle(color: Colors.white, fontSize: 16.0));
 
@@ -240,7 +315,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
         DialogButton(
           child: btnText('Да'),
           onPressed: () {
-            _onEntitySave(entity, true);
+            _onEntitySave(entity, key, true);
             alertDelete.dismiss();
           },
           width: 50,
@@ -260,7 +335,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
     alertDelete.show();
   }
 
-  _onEditEntity([PasswordsItemEntity? entity]) {
+  _entityEditor(Key key, [PasswordsItemEntity? entity]) {
     if (entity == null) {
       int lastSort = 0;
       if (_entities.isNotEmpty) {
@@ -272,16 +347,24 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
       entity = PasswordsItemEntity()..sort = lastSort;
     }
 
+    if (entity.subtype == PasswordsItemEntitySubtype.password) {
+      entity.value = _encrypter.decrypt(encrypt.Encrypted.fromBase16(entity.value), iv: _encrypterIV);
+    }
+
     alert = Alert(
       context: context,
       closeIcon: const Icon(Icons.close),
       title: "Элемент",
       content: PasswordEntityEditor(
-          data: entity,
-          onSave: _onEntitySave,
-          onClose: () {
-            alert.dismiss();
-          }),
+        key: key,
+        data: entity,
+        onSave: _onEntitySave,
+        onClose: () {
+          alert.dismiss();
+        },
+        // encrypter: _encrypter,
+        // encrypterIV: _encrypterIV,
+      ),
       buttons: [],
     );
 

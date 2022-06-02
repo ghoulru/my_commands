@@ -5,16 +5,23 @@ import 'package:my_commands/utils/styles.dart';
 import 'models.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'password_entity_editor.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 // import 'package:rflutter_alert/rflutter_alert.dart';
 
 class PasswordsEntity extends StatelessWidget {
   final PasswordsItemEntity data;
   final Function? onEdit;
   final Function? onDelete;
+  final Key key;
+  final encrypt.Encrypter? encrypter;
+  final encrypt.IV? encrypterIV;
 
   const PasswordsEntity({
-    Key? key,
+    // Key? key,
+    required this.key,
     required this.data,
+    this.encrypter,
+    this.encrypterIV,
     this.onEdit,
     this.onDelete,
   }) : super(key: key);
@@ -22,6 +29,7 @@ class PasswordsEntity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //{double height= 20.0}
+    // print(key);
 
     final bool isEdit = onEdit != null;
 
@@ -62,7 +70,17 @@ class PasswordsEntity extends StatelessWidget {
           );
         }
         else {
-          valueWidget = copiedText(context, data.value);
+          logger.d(data);
+          late String val;
+          if (data.subtype == PasswordsItemEntitySubtype.password ) {
+            val = encrypter?.decrypt(encrypt.Encrypted.fromBase16(data.value), iv: encrypterIV!) ?? data.value;
+          }
+          else {
+            val = data.value;
+          }
+          // val = val + ' / ' + data.subtype.toString();
+
+          valueWidget = copiedText(context, val);
         }
 
 
@@ -113,18 +131,20 @@ class PasswordsEntity extends StatelessWidget {
           content,
           Row(
             children: [
+              // РЕДАКТИРОВАТЬ
               GestureDetector(
                 key: UniqueKey(),
                 onTap: () {
-                  onEdit!(data);
+                  onEdit!(key, data);
                 },
                 child: const Icon(Icons.edit, size: icoSize, color: Colors.green),
               ),
               const SizedBox(width: 10.0),
+              // УДАЛИТЬ
               GestureDetector(
                 key: UniqueKey(),
                 onTap: () {
-                  onDelete!(data);
+                  onDelete!(data, key);
                 },
                 child: const Icon(Icons.delete_forever, size: icoSize, color: Colors.red),
               ),

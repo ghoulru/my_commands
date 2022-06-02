@@ -14,6 +14,7 @@ import 'package:objectbox/objectbox.dart';
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
 import 'screens/passwords/models.dart';
+import 'utils/app_models.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
@@ -124,6 +125,31 @@ final _entities = <ModelEntity>[
             flags: 0)
       ],
       relations: <ModelRelation>[],
+      backlinks: <ModelBacklink>[]),
+  ModelEntity(
+      id: const IdUid(4, 833190356009252074),
+      name: 'Settings',
+      lastPropertyId: const IdUid(3, 834553099565089482),
+      flags: 0,
+      properties: <ModelProperty>[
+        ModelProperty(
+            id: const IdUid(1, 5800481548970958660),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        ModelProperty(
+            id: const IdUid(2, 4615520900115945520),
+            name: 'name',
+            type: 9,
+            flags: 2080,
+            indexId: const IdUid(4, 7104629174196498589)),
+        ModelProperty(
+            id: const IdUid(3, 834553099565089482),
+            name: 'value',
+            type: 9,
+            flags: 0)
+      ],
+      relations: <ModelRelation>[],
       backlinks: <ModelBacklink>[])
 ];
 
@@ -147,8 +173,8 @@ Future<Store> openStore(
 ModelDefinition getObjectBoxModel() {
   final model = ModelInfo(
       entities: _entities,
-      lastEntityId: const IdUid(3, 5617649913534481621),
-      lastIndexId: const IdUid(3, 2973430421584005801),
+      lastEntityId: const IdUid(4, 833190356009252074),
+      lastIndexId: const IdUid(4, 7104629174196498589),
       lastRelationId: const IdUid(0, 0),
       lastSequenceId: const IdUid(0, 0),
       retiredEntityUids: const [],
@@ -283,6 +309,37 @@ ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
           object.parent.attach(store);
           return object;
+        }),
+    Settings: EntityDefinition<Settings>(
+        model: _entities[3],
+        toOneRelations: (Settings object) => [],
+        toManyRelations: (Settings object) => {},
+        getId: (Settings object) => object.id,
+        setId: (Settings object, int id) {
+          object.id = id;
+        },
+        objectToFB: (Settings object, fb.Builder fbb) {
+          final nameOffset = fbb.writeString(object.name);
+          final valueOffset = fbb.writeString(object.value);
+          fbb.startTable(4);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, nameOffset);
+          fbb.addOffset(2, valueOffset);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = Settings()
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..name = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 6, '')
+            ..value = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 8, '');
+
+          return object;
         })
   };
 
@@ -352,4 +409,17 @@ class PasswordsItemEntity_ {
   /// see [PasswordsItemEntity.dbSubtype]
   static final dbSubtype =
       QueryIntegerProperty<PasswordsItemEntity>(_entities[2].properties[6]);
+}
+
+/// [Settings] entity fields to define ObjectBox queries.
+class Settings_ {
+  /// see [Settings.id]
+  static final id = QueryIntegerProperty<Settings>(_entities[3].properties[0]);
+
+  /// see [Settings.name]
+  static final name = QueryStringProperty<Settings>(_entities[3].properties[1]);
+
+  /// see [Settings.value]
+  static final value =
+      QueryStringProperty<Settings>(_entities[3].properties[2]);
 }
