@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_commands/utils/widget_context_menu.dart';
 import 'models.dart';
 import 'passwords_entity.dart';
 import 'package:my_commands/utils/styles.dart';
@@ -50,6 +51,7 @@ class PasswordsItemView extends StatelessWidget {
             TextHeader(data.name),
           ],
         ),
+
         //+ ' > ' + tabIndex.toString()
         Row(
           children: [
@@ -98,9 +100,34 @@ class PasswordsItemView extends StatelessWidget {
       ));
     }
 
+    // WidgetContextMenu testSubmenu = WidgetContextMenu(
+    //   key: UniqueKey(),
+    //   child: const Text('test context menu'),
+    //   // width: 300,
+    //   menu: [
+    //     WidgetContextMenuItem(
+    //         key: UniqueKey(),
+    //         title: 'Редактировать',
+    //         onTap: (){
+    //           logger.d('tap submenu Редактировать');
+    //         }
+    //     ),
+    //     WidgetContextMenuItem(
+    //         key: UniqueKey(),
+    //         title: 'Удалить',
+    //         onTap: (){
+    //           logger.d('tap submenu Удалить');
+    //           // Navigator.pop(context);
+    //         },
+    //         disabled: true
+    //     ),
+    //
+    //   ],
+    // );
+
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -114,7 +141,9 @@ class PasswordsItemView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: entitiesList,
                 ),
-              )),
+              ),
+          ),
+          // testSubmenu,
         ],
       ),
       // child: SingleChildScrollView(

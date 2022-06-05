@@ -33,6 +33,7 @@ const Map<String, String> entryNames = {
   "url": "URL",
   "address": "Адрес",
   "host": "Host",
+  "dbname": "Имя БД"
 };
 
 class PasswordEntityEditor extends StatefulWidget {

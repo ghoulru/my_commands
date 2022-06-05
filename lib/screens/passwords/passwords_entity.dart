@@ -57,20 +57,34 @@ class PasswordsEntity extends StatelessWidget {
       case "entry":
         late Widget valueWidget;
         if (data.subtype == PasswordsItemEntitySubtype.url) {
-          valueWidget = GestureDetector(
-            onTap: () async {
-              final Uri _url = Uri.parse(data.value);
-              if (await canLaunchUrl(_url)) {
-                await launchUrl(_url);
-              } else {
-                throw 'Could not launch ' + data.value;
-              }
-            },
-            child: Text(data.value),
+          valueWidget = MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () async {
+                final Uri _url = Uri.parse(data.value);
+                if (await canLaunchUrl(_url)) {
+                  await launchUrl(_url);
+                } else {
+                  throw 'Could not launch ' + data.value;
+                }
+              },
+              child: Text(data.value),
+            )
           );
+          // valueWidget = GestureDetector(
+          //   onTap: () async {
+          //     final Uri _url = Uri.parse(data.value);
+          //     if (await canLaunchUrl(_url)) {
+          //       await launchUrl(_url);
+          //     } else {
+          //       throw 'Could not launch ' + data.value;
+          //     }
+          //   },
+          //   child: Text(data.value),
+          // );
         }
         else {
-          logger.d(data);
+          // logger.d(data);
           late String val;
           if (data.subtype == PasswordsItemEntitySubtype.password ) {
             val = encrypter?.decrypt(encrypt.Encrypted.fromBase16(data.value), iv: encrypterIV!) ?? data.value;
@@ -173,7 +187,9 @@ class PasswordsEntity extends StatelessWidget {
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: value)).then((_) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Скопировано в буфер обмена: ' + value)));
+                        content: Text('Скопировано в буфер обмена: ' + value),
+                        duration: Duration(milliseconds: 1000),
+                    ));
                   });
                 },
                 child: Icon(

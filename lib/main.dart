@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart' hide MenuItem;
 import 'package:process_run/shell.dart';
 import 'package:system_tray/system_tray.dart' as system_tray;
@@ -48,10 +46,10 @@ Future<void> main() async {
     // Set to frameless window
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
-    await windowManager.setSize(const Size(1200, 1000));
+    await windowManager.setSize(const Size(800, 1000));
     await windowManager.center();
-    // await windowManager.show();
-    await windowManager.hide();
+    await windowManager.show();
+    // await windowManager.hide();
     // await windowManager.setSkipTaskbar(true);
   });
 
@@ -301,11 +299,11 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
     // init();
   }
 
-  @override
-  void onWindowResize() async {
-    Size sizes = await windowManager.getSize();
-    print(sizes.width);
-
-    // settingsBox.put()
-  }
+  // @override
+  // void onWindowResize() async {
+  //   Size sizes = await windowManager.getSize();
+  //   print(sizes.width);
+  //
+  //   // settingsBox.put()
+  // }
 }
