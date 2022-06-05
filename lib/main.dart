@@ -46,10 +46,10 @@ Future<void> main() async {
     // Set to frameless window
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
-    await windowManager.setSize(const Size(800, 1000));
+    await windowManager.setSize(const Size(1200, 1000));
     await windowManager.center();
-    await windowManager.show();
-    // await windowManager.hide();
+    // await windowManager.show();
+    await windowManager.hide();
     // await windowManager.setSkipTaskbar(true);
   });
 
