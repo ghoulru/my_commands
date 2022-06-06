@@ -7,7 +7,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'models.dart';
 import 'password_entity_editor.dart';
 import 'passwords_entity.dart';
-import 'package:my_commands/utils/app_models.dart';
+import 'package:my_commands/utils/secret_key.dart';
 
 var logger = Logger();
 

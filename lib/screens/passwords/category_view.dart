@@ -3,7 +3,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:vertical_tabs/vertical_tabs.dart';
 import 'package:logger/logger.dart';
 import 'package:my_commands/objectbox.g.dart';
-import 'package:my_commands/utils/app_models.dart';
+import 'package:my_commands/utils/secret_key.dart';
 import 'models.dart';
 import 'category_tab.dart';
 import 'passwords_item_view.dart';

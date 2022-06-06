@@ -1,7 +1,6 @@
 import 'package:objectbox/objectbox.dart';
 
-const String appEncryptSecretKey = 'ioQT1GNjJXxOZuELU3HWr4LGSihQmfJy';
-const int appEncryptSecretKeyIV = 16;
+
 /// Настройки
 @Entity()
 class Settings {

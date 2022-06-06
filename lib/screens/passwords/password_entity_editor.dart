@@ -3,7 +3,7 @@ import 'package:my_commands/utils/text_field_predefined_values.dart';
 import 'models.dart';
 import 'package:logger/logger.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
-import 'package:my_commands/utils/app_models.dart';
+import 'package:my_commands/utils/secret_key.dart';
 
 var logger = Logger();
 
