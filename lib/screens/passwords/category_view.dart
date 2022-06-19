@@ -19,8 +19,8 @@ class CategoryView extends StatefulWidget {
     required this.store,
     required this.tabs,
     required this.showItemEditor,
-    // required this.activeTabAndItem,
-    // required this.setActiveTabAndItem,
+    required this.activeTabAndItem,
+    required this.setActiveTabAndItem,
   }) : super(key: key);
 
   final List<CategoryTab> categoryTabs;
@@ -30,15 +30,15 @@ class CategoryView extends StatefulWidget {
   final List tabs;
   final Function showItemEditor;
 
-  // final Map<int, int> activeTabAndItem;
-  // final Function setActiveTabAndItem;
+  final Map<int, int> activeTabAndItem;
+  final Function setActiveTabAndItem;
 
   @override
   State<CategoryView> createState() => CategoryViewState();
 }
 
 class CategoryViewState extends State<CategoryView> {
-  late Map<int, int> activeTabAndItem = {};
+  late Map<int, int> _thisActiveTabAndItem = {};
   late encrypt.Encrypter _encrypter;
   late encrypt.IV _encrypterIV;
 
@@ -50,11 +50,14 @@ class CategoryViewState extends State<CategoryView> {
     //
     // final Map<int, PasswordsItem> passwordsItem4Tab = {};
 
-    logger.d('initState CategoryViewState');
-    logger.d(widget.tabs);
-    for (var tab in widget.tabs) {
-      activeTabAndItem[tab.id] = 0;
-    }
+    // logger.d('initState CategoryViewState');
+    // logger.d(widget.tabs, 'initState CategoryViewState');
+    // logger.d(widget.activeTabAndItem, 'initState CategoryViewState');
+    // for (var tab in widget.tabs) {
+    //   _thisActiveTabAndItem[tab.id] = 0;
+    // }
+    _thisActiveTabAndItem = widget.activeTabAndItem;
+    logger.d(_thisActiveTabAndItem, '_thisActiveTabAndItem CategoryViewState initState');
 
     final key = encrypt.Key.fromUtf8(appEncryptSecretKey);
     _encrypterIV = encrypt.IV.fromLength(appEncryptSecretKeyIV);
@@ -83,13 +86,11 @@ class CategoryViewState extends State<CategoryView> {
       // logger.d(categoryTab.tab);
       // tabsContent.add(Text("tab content: " + categoryTab.tab.name));
       if (tab.items.length == 0) {
-        tabsContent.add(const Text("no items"));
+        tabsContent.add(Text(tab.name + " has no items"));
       } else {
         tabsContent.add(categoryPasswords(tab));
       }
     }
-
-    // logger.d(activeTabAndItem, 'CategoryView build activeTabAndItem');
 
     return Center(
         // child: Text('passwords passwords passwords passwords '),
@@ -127,10 +128,13 @@ class CategoryViewState extends State<CategoryView> {
             // child: Text('888'),
             child: TabBarView(
                 controller: widget.categoryTabsController,
-                children: tabsContent)),
+                children: tabsContent,
+            ),
+        ),
       ],
     ));
   }
+
 
   // void onSelectSite(index, category) {
   //   logger.d(index, 'VerticalTabs onSelect ' + category.id.toString());
@@ -155,9 +159,11 @@ class CategoryViewState extends State<CategoryView> {
 
     //TODO добавить строку быстрого поиска, наверное лучше в шапку, т.е. надо использовать редукс= Bloc
 
-    //TODO сортировать по имени или как то иначе, если будут кнопки
+    //сортировка по имени или как то иначе, если будут кнопки
     final List<PasswordsItem> categoryItems = category.items;
     categoryItems.sort((a, b) => a.name.compareTo(b.name));
+
+
 
     int i = 0;
     for (PasswordsItem item in categoryItems) {
@@ -177,27 +183,45 @@ class CategoryViewState extends State<CategoryView> {
     //     'categoryPasswords init site index for catId ' +
     //         category.id.toString());
 
+    int initIndex = _thisActiveTabAndItem[category.id] ?? 0;
+    if (initIndex > categoryItems.length) {
+      initIndex = 0;
+    }
+
+
+    // logger.d(initIndex, 'initIndex for tabid= ' + category.id.toString());
+    // logger.d(_thisActiveTabAndItem);
+
     return VerticalTabs(
         contentScrollAxis: Axis.vertical,
         tabs: itemTabs,
         contents: itemTabsContent,
-        initialIndex: activeTabAndItem[category.id],
+        initialIndex: initIndex,
         onSelect: (index) {
-          // logger.d(
-          //     index,
-          //     'VerticalTabs onSelect =' +
-          //         activeTabAndItem[category.id].toString());
 
-          Map<int, int> atai = {...activeTabAndItem};
+          // int lastIndex = widget.activeTabAndItem[category.id] ?? 0;
+          int lastIndex = _thisActiveTabAndItem[category.id] ?? 0;
+
+          // logger.d(
+          //     'index=' + index.toString()
+          //     + ' / lastIndex='
+          //     + lastIndex.toString(),
+          //     'VerticalTabs onSelect tabId=' + category.id.toString()
+          // );
+          // logger.d(_thisActiveTabAndItem);
+
+          Map<int, int> atai = {..._thisActiveTabAndItem};
           atai[category.id] = index;
-          logger.d(atai);
+          // logger.d(atai);
 
           WidgetsBinding.instance!.addPostFrameCallback((_) {
             // logger.d('setState activeTabAndItem');
             setState(() {
-              activeTabAndItem = atai;
+              _thisActiveTabAndItem = atai;
             });
+            widget.setActiveTabAndItem(tabId:category.id, siteIndex: index);
           });
+
         });
   }
 }

@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:my_commands/utils/widget_context_menu.dart';
+//import 'package:my_commands/utils/widget_context_menu.dart';
 import 'models.dart';
 import 'passwords_entity.dart';
 import 'package:my_commands/utils/styles.dart';
@@ -32,6 +36,31 @@ class PasswordsItemView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // logger.d(data);
+
+    late Widget imgWrap;
+    if (data.logoURL != '') {
+      late Widget img;
+      if (data.logoURL.indexOf('http') == 0) {
+        img = CachedNetworkImage(
+          imageUrl: data.logoURL,
+          height: 30.0,
+        );
+      }
+      else {
+        img = Image.file(
+          File(data.logoURL),
+          height: 30.0
+        );
+      }
+      imgWrap = Row(children: [
+        img,
+        const SizedBox(width: 10.0),
+      ]);
+    }
+    else {
+      imgWrap = Container();
+    }
+
     Widget header = Row(
       key: UniqueKey(),
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -39,15 +68,7 @@ class PasswordsItemView extends StatelessWidget {
       children: [
         Row(
           children: [
-            data.logoURL != ''
-                ? Row(children: [
-                    Image.network(
-                      data.logoURL,
-                      height: 30.0,
-                    ),
-                    const SizedBox(width: 10.0),
-                  ])
-                : Container(),
+            imgWrap,
             TextHeader(data.name),
           ],
         ),
@@ -59,8 +80,9 @@ class PasswordsItemView extends StatelessWidget {
               message: 'Экспортировать в файл',
               waitDuration: const Duration(seconds: 1),
               child: GestureDetector(
-                onTap: () {
+                onTap: () async {
                   //TODO экспорт в текстовый файл
+                  exportToFile();
                 },
                 // onTap: showItemEditor!,
                 child: Icon(Icons.file_download_outlined,
@@ -81,8 +103,10 @@ class PasswordsItemView extends StatelessWidget {
               ),
             ),
           ],
-        )
+        ),
+
       ],
+
     );
     // entitiesList.add(marginBtm(30.0));
 
@@ -90,7 +114,7 @@ class PasswordsItemView extends StatelessWidget {
 
     List<Widget> entitiesList = [];
     for (PasswordsItemEntity entity in data.entities) {
-      // logger.d(entity);
+
       entitiesList.add(PasswordsEntity(
         key: UniqueKey(),
         data: entity,
@@ -99,6 +123,26 @@ class PasswordsItemView extends StatelessWidget {
         // onEdit: _onEditEntity,
       ));
     }
+
+    entitiesList.add(
+        Divider(
+            height: 50.0,
+            thickness: 5.0,
+            color: Colors.blue[200]
+        )
+    );
+    // entitiesList.add(
+    //   Column(
+    //     children: [
+    //       marginBtm(10.0),
+    //       Divider(
+    //         height: 5.0,
+    //           thickness: 10.0,
+    //         color: Colors.blue[200]
+    //       )
+    //     ],
+    //   )
+    // );
 
     // WidgetContextMenu testSubmenu = WidgetContextMenu(
     //   key: UniqueKey(),
@@ -124,6 +168,7 @@ class PasswordsItemView extends StatelessWidget {
     //
     //   ],
     // );
+    ScrollController scrollController = ScrollController(keepScrollOffset: true);
 
 
     return Container(
@@ -132,10 +177,17 @@ class PasswordsItemView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           header,
-          marginBtm(30.0),
+          marginBtm(20.0),
+          Divider(
+              height: 0.0,
+              thickness: 2.0,
+              color: Colors.blue[200]
+          ),
+          // marginBtm(30.0),
           Expanded(
               flex: 1,
               child: SingleChildScrollView(
+                controller: scrollController,
                 primary: false,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -153,5 +205,55 @@ class PasswordsItemView extends StatelessWidget {
       //   ),
       // )
     );
+  }
+
+  void exportToFile() async {
+
+    String? outputFile = await FilePicker.platform.saveFile(
+      dialogTitle: 'Выберите путь для загрузки:',
+      fileName: data.name + '.txt',
+    );
+
+
+    if (outputFile != null && outputFile != "") {
+      try {
+        final file = File(outputFile);
+        file.writeAsString(exportFileContent());
+      }
+      catch(ex){
+        logger.d(ex);
+      }
+    }
+  }
+  String exportFileContent() {
+    String c = '';
+
+    if (data.entities.isNotEmpty) {
+      data.entities.sort((a, b) => a.sort.compareTo(b.sort));
+
+      // List<String> entitiesList = [];
+      for (PasswordsItemEntity entity in data.entities) {
+        switch (entity.type) {
+          case "spacer":
+            c += "\n\n";
+            break;
+          case "title":
+            c += entity.name + "\n";
+            break;
+          case "entry":
+            late String val;
+            if (entity.subtype == PasswordsItemEntitySubtype.password ) {
+              val = encrypter?.decrypt(encrypt.Encrypted.fromBase16(entity.value), iv: encrypterIV!) ?? entity.value;
+            }
+            else {
+              val = entity.value;
+            }
+            c += entity.name + ": " + val  + "\n";
+            break;
+        }
+      }
+    }
+
+    return c;
   }
 }

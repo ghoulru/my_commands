@@ -37,6 +37,8 @@ class Passwords extends StatefulWidget {
 class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
   late List<CategoryTab> _categoryTabs;
   late TabController _categoryTabsController;
+  //запоминаем выбранный сайт для каждой вкладки
+  late Map<int, int> activeTabAndItem = {};
 
   Widget view = loader;
 
@@ -48,21 +50,24 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     });
   }
 
-  //запоминаем выбранный сайт для каждой вкладки
-  late Map<int, int> activeTabAndItem = {};
+
 
   void setActiveTabAndItem({required int tabId, required int siteIndex}) {
-    logger.d(siteIndex, 'setActiveTabAndItem ' + tabId.toString());
+    // logger.d(siteIndex, 'setActiveTabAndItem tabId= ' + tabId.toString());
     Map<int,int> atai = {...activeTabAndItem};
     atai[ tabId ] = siteIndex;
-    logger.d(atai);
-
-    // WidgetsBinding.instance!.addPostFrameCallback((_){
-    //   logger.d('setState activeTabAndItem');
-    //   setState(() {
-    //     activeTabAndItem = atai;
-    //   });
+    logger.d(atai, 'setActiveTabAndItem');
+    // setState(() {
+    //   activeTabAndItem = atai;
     // });
+    /**/
+    WidgetsBinding.instance!.addPostFrameCallback((_){
+      // logger.d('setState activeTabAndItem');
+      setState(() {
+        activeTabAndItem = atai;
+      });
+    });
+    /**/
 
   }
 
@@ -91,11 +96,17 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
         tabIndex = i;
         // currentTab = tab;
       }
+      if (!activeTabAndItem.containsKey(tab.id)) {
+        activeTabAndItem[tab.id] = 0;
+      }
       i++;
     }
+    // logger.d(tabIndex, 'showTabs tabIndex');
+    // logger.d(ct.length);
 
     _categoryTabs = ct;
-    _categoryTabsController = TabController(vsync: this, length: ct.length, initialIndex: tabIndex);
+    _categoryTabsController = TabController(initialIndex: tabIndex, length: ct.length, vsync: this);
+
 
 
     setState(() {
@@ -106,8 +117,8 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
           store: widget.store,
           tabs: tabs,
           showItemEditor: showItemEditor,
-          // activeTabAndItem: activeTabAndItem,
-          // setActiveTabAndItem: setActiveTabAndItem,
+          activeTabAndItem: activeTabAndItem,
+          setActiveTabAndItem: setActiveTabAndItem,
       );
     });
 
@@ -168,10 +179,11 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
   }
   void saveItem(data, category, itemTabIndex) {
     logger.d(data, 'save  site passwords');
+    // logger.d(itemTabIndex)
 
     final itemId = widget.passwordsItemsBox.put(data);
 
-    logger.d(itemId);
+    // logger.d(itemId);
     showTabs(currentTabId: category.id);
   }
 

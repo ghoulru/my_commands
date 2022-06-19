@@ -29,7 +29,8 @@ late List<dynamic> settings;
  * работа с окном
  * https://github.com/leanflutter/window_manager
  *
- *
+ * TODO добавление сайта в избранное и вывод их списка снизу кнопками И в меню в трее
+ * TODO поиск по сайтам в разделе пароли
  *
  */
 Future<void> main() async {

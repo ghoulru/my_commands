@@ -6,6 +6,7 @@ import 'models.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'password_entity_editor.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:my_commands/utils/widget_context_menu.dart';
 // import 'package:rflutter_alert/rflutter_alert.dart';
 
 class PasswordsEntity extends StatelessWidget {
@@ -140,6 +141,29 @@ class PasswordsEntity extends StatelessWidget {
 
     if (isEdit) {
       const double icoSize = 20.0;
+
+      return WidgetContextMenu(
+        key: UniqueKey(),
+        width: 200,
+          child:content,
+        menu: [
+          WidgetContextMenuItem(
+              key: UniqueKey(),
+              title: 'Редактировать',
+              onTap: (){
+                onEdit!(key, data);
+              }
+          ),
+          WidgetContextMenuItem(
+              key: UniqueKey(),
+              title: 'Удалить',
+              onTap: (){
+                onDelete!(data, key);
+              }
+          ),
+        ]
+      );
+
       return Row(
         children: [
           content,
@@ -175,6 +199,32 @@ class PasswordsEntity extends StatelessWidget {
   }
 
   Widget copiedText(context, String value) {
+    return GestureDetector(
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: value)).then((_) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Скопировано в буфер обмена: ' + value),
+            duration: Duration(milliseconds: 1000),
+          ));
+        });
+      },
+      child: HoverWidget(
+          onHover: (e) {},
+          child: Text(value + '       '),
+          hoverChild: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(value),
+              const SizedBox(width: 10.0),
+              Icon(
+                Icons.copy,
+                color: Colors.grey[600],
+                size: 16.0,
+              ),
+            ],
+          )
+      )
+    );
     return HoverWidget(
         onHover: (e) {},
         child: Text(value + '       '),
@@ -196,9 +246,11 @@ class PasswordsEntity extends StatelessWidget {
                   Icons.copy,
                   color: Colors.grey[600],
                   size: 16.0,
-                ))
+                ),
+            ),
           ],
-        ));
+        )
+    );
   }
 
 

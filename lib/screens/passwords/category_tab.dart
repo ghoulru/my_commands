@@ -46,6 +46,8 @@ class CategoryTab extends StatelessWidget {
                   '(' + tab.items.length.toString() + ')',
                   style: TextStyle(color: Colors.grey[400])
               ),
+              // const SizedBox(width: 5.0),
+              // Text(tab.id.toString()),
             ],
           )
       ),
@@ -57,7 +59,7 @@ class CategoryTab extends StatelessWidget {
               onAddItem(id: 0, category: tab);
             }
         ),
-        WidgetContextMenuDivider(),
+        const WidgetContextMenuDivider(),
         WidgetContextMenuItem(
             key: UniqueKey(),
             title: 'Редактировать вкладку',
@@ -86,70 +88,5 @@ class CategoryTab extends StatelessWidget {
       ]
     );
 
-    return ContextMenuArea(items: [
-
-      ListTile(
-        title: const Text('Добавить элемент'),
-        onTap: () {
-          onAddItem(id: 0, category: tab);
-        },
-      ),
-      Divider(
-        height: 20,
-        thickness: 1,
-        indent: 0,
-        endIndent: 0,
-        color: Colors.grey[400],
-      ),
-      ListTile(
-        title: const Text('Редактировать вкладку'),
-        // contentPadding: EdgeInsets.all(2.0),
-        minVerticalPadding: 0,
-        horizontalTitleGap: 0,
-        // onTap: onEdit(tab.id),
-        onTap: () {
-          debugPrint("Option Редактировать " + tab.id.toString());
-          onEdit(tab.id);
-        },
-      ),
-
-      ListTile(
-        // leading: Icon(Icons.model_training),
-        title: const Text('Удалить вкладку'),
-        enabled: tab.items.isEmpty,
-        onTap: () async {
-          if (await confirm(
-              context,
-            title: null,//const Text(''),
-            content: const Text('Подтвердите удаление'),
-            textOK: const Text('Да'),
-            textCancel: const Text('Нет'),
-          )) {
-            debugPrint("ontap delete");
-
-            onDelete(tab.id);
-          }
-        },
-      )
-    ],
-        width: 300,
-        // child: Text(title)
-        child: Padding(
-          padding: const EdgeInsets.only(left: 8, right: 15, top: 10, bottom: 10),
-          child:
-            // Text('tab')
-          Row(
-            children: [
-              // Text(tab.id.toString()),
-              Text(tab.name),
-              const SizedBox(width: 5.0),
-              Text(
-                '(' + tab.items.length.toString() + ')',
-                style: TextStyle(color: Colors.grey[400])
-              ),
-            ],
-          )
-        )
-    );
   }
 }

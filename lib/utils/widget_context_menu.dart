@@ -21,7 +21,8 @@ class WidgetContextMenu extends StatefulWidget {
     required this.menu,
     this.builder,
     this.width = 200.0,
-  }) : super(key: key);
+  }) :// assert(menu.length > 0),
+        super(key: key);
 
   @override
   State<WidgetContextMenu> createState() => WidgetContextMenuState();
