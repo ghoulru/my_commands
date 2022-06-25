@@ -8,6 +8,7 @@ import 'models.dart';
 import 'password_entity_editor.dart';
 import 'passwords_entity.dart';
 import 'package:my_commands/utils/secret_key.dart';
+import 'category_tab.dart';
 
 var logger = Logger();
 
@@ -19,10 +20,12 @@ class PasswordItemEditor extends StatefulWidget {
   final bool editable;
   final Store store;
   final int tabIndex; //индекс во вкладках
+  final List categoryTabs;
 
   const PasswordItemEditor({
     Key? key,
     required this.data,
+    required this.categoryTabs,
     required this.category,
     required this.onSave,
     required this.onClose,
@@ -46,6 +49,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
 
   late encrypt.Encrypter _encrypter;
   late encrypt.IV _encrypterIV;
+  late CategoryTabModel _category;
 
   @override
   void initState() {
@@ -54,6 +58,8 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
     _id = widget.data?.id ?? 0;
     _name = widget.data?.name ?? '';
     _logoURL = widget.data?.logoURL ?? '';
+    _category = widget.category;
+
     _entities = widget.data?.entities ?? [];
     _entitiesSet = {};
     if (_entities.isNotEmpty) {
@@ -76,6 +82,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
 
     final List<Widget> buttons = [
       ElevatedButton(
+        child: const Text('Сохранить'),
         onPressed: () {
           if (_formKey.currentState!.validate()) {
             final item = PasswordsItem()
@@ -83,50 +90,28 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
               ..name = _name
               ..logoURL = _logoURL;
 
-            item.category.target = widget.category;
+            item.category.target = _category;
             item.entities.addAll(_entities);
 
             logger.d(item, 'onPressed save passwords item');
 
-            widget.onSave(item, widget.category, widget.tabIndex);
+            widget.onSave(item, _category, widget.tabIndex);
           }
         },
-        child: const Text('Сохранить'),
       ),
       const SizedBox(width: 20.0),
       ElevatedButton(
-          onPressed: () {
-            widget.onClose(currentTabId: widget.category.id);
-          },
           child: const Text('Закрыть'),
+          onPressed: () {
+            widget.onClose(currentTabId: _category.id);
+          },
           style: ElevatedButton.styleFrom(primary: Colors.grey[400])),
     ];
 
     _entities.sort((a, b) => a.sort.compareTo(b.sort));
 
     List<Widget> entitiesList = [];
-    // for (PasswordsItemEntity entity in _entities) {
-    //   entitiesList.add(Row(
-    //     key: UniqueKey(),
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Text(entity.sort.toString(),
-    //           style: TextStyle(color: Colors.grey[300])),
-    //       const SizedBox(width: 10.0),
-    //       Expanded(
-    //           flex: 1,
-    //           child: PasswordsEntity(
-    //               key: UniqueKey(),
-    //               data: entity,
-    //               onEdit: _entityEditor,
-    //               onDelete: _onEntityDelete))
-    //     ],
-    //   ));
-    // }
-    // final key = encrypt.Key.fromUtf8(appEncryptSecretKey);
-    // final iv = encrypt.IV.fromLength(appEncryptSecretKeyIV);
-    // logger.d(key.runtimeType);
-    // final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
 
     final entitiesSetSorted =
         SplayTreeMap<Key, dynamic>.from(_entitiesSet, (a, b) {
@@ -158,6 +143,20 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
         ],
       ));
     });
+
+    final int categoryListSelectedValue = _category.id;
+    final List<DropdownMenuItem<int>> categoryList = [];
+    // logger.d(widget.category, 'cur cat');
+    for (var tab in widget.categoryTabs) {
+      categoryList.add(DropdownMenuItem(
+          value: tab.id,
+          child: Text(tab.name)
+      ));
+    }
+
+    // entityTypes.forEach((String key, String value) {
+    //   eTypes.add(DropdownMenuItem(value: key, child: Text(value)));
+    // });
 
     return Container(
         padding: const EdgeInsets.all(10.0),
@@ -200,6 +199,27 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
                 ),
               ),
               const SizedBox(height: 20.0),
+              DropdownButton<int>(
+                  value: categoryListSelectedValue,
+                  icon: const Icon(Icons.chevron_right, size: 20.0),
+                  elevation: 16,
+                  onChanged: (int? val) {
+                    logger.d('change category to ' + val!.toString());
+
+                    CategoryTabModel newCategory = _category;
+
+                    for (var tab in widget.categoryTabs) {
+                      if (val == tab.id) {
+                        newCategory = tab;
+                      }
+                    }
+                    setState(() {
+                      _category = newCategory;
+                    });
+                  },
+                  items: categoryList
+              ),
+              const SizedBox(height: 20.0),
               Expanded(
                 flex: 1,
                 child: SingleChildScrollView(
@@ -232,34 +252,44 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
         ));
   }
 
-  late Alert alert;
+  Alert? alert;
 
-  void _onEntitySave(PasswordsItemEntity entity, Key entityKey,
-      [bool delete = false]) {
+  void _onEntitySave(
+      PasswordsItemEntity entity,
+      Key entityKey,
+      [bool delete = false]
+      ) {
     logger.d(entity, '_onEntitySave ' + entityKey.toString());
 
     // _entitiesSet[ entityKey ] = entity
     Map<Key, PasswordsItemEntity> newSet = {..._entitiesSet};
     if (delete) {
       newSet.remove(entityKey);
-      widget.store.box<PasswordsItemEntity>().remove(entity.id);
+      if (entity.id != 0) {
+        widget.store.box<PasswordsItemEntity>().remove(entity.id);
+      }
     } else {
       newSet[entityKey] = entity;
     }
     List<PasswordsItemEntity> newEntities = [];
     newSet.forEach((key, value) => newEntities.add(value));
 
+    // logger.d(alert.runtimeType, 'runtimeType alert');
+    if (alert.runtimeType == Alert && delete == false) {
+      alert!.dismiss();
+    }
+    // try {
+    //
+    // } catch (ex) {
+    //   logger.e('try delete alert');
+    // }
+
     setState(() {
       _entitiesSet = newSet;
       _entities = newEntities;
     });
 
-    // logger.d(alert.runtimeType);
-    try {
-      alert.dismiss();
-    } catch (ex) {
-      1;
-    }
+
   }
 
   void _onEntitySaveOld(PasswordsItemEntity entity, [bool delete = false]) {
@@ -294,13 +324,19 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
 
     // logger.d(alert.runtimeType);
     try {
-      alert.dismiss();
+      alert!.dismiss();
     } catch (ex) {
       // logger.e('try to dismiss alert');
     }
   }
 
   late Alert alertDelete;
+  void alertDeleteHide() {
+    logger.d(alertDelete.runtimeType);
+    if (alertDelete.runtimeType == Alert) {
+      alertDelete.dismiss();
+    }
+  }
 
   void _onEntityDelete(PasswordsItemEntity entity, Key key) {
     Widget btnText(String txt) =>
@@ -316,13 +352,13 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
           child: btnText('Да'),
           onPressed: () {
             _onEntitySave(entity, key, true);
-            alertDelete.dismiss();
+            alertDeleteHide();
           },
           width: 50,
         ),
         DialogButton(
           child: btnText('Нет'),
-          onPressed: () => alertDelete.dismiss(),
+          onPressed: () => alertDeleteHide(),
           color: Colors.red[300],
           width: 50,
         ),
@@ -360,7 +396,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
         data: entity,
         onSave: _onEntitySave,
         onClose: () {
-          alert.dismiss();
+          alert!.dismiss();
         },
         // encrypter: _encrypter,
         // encrypterIV: _encrypterIV,
@@ -368,6 +404,6 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
       buttons: [],
     );
 
-    alert.show();
+    alert!.show();
   }
 }

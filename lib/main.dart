@@ -13,7 +13,7 @@ enum ScreenType {
 }
 
 // ignore: constant_identifier_names
-const bool DEBUG = true;
+late bool DEBUG;
 
 late ObjectBox objectbox;
 late List<dynamic> settings;
@@ -29,25 +29,37 @@ late List<dynamic> settings;
  * работа с окном
  * https://github.com/leanflutter/window_manager
  *
+ *
  * TODO добавление сайта в избранное и вывод их списка снизу кнопками И в меню в трее
  * TODO поиск по сайтам в разделе пароли
+ * TODO раздел с моими работами, с кнопками начать работу, пауза, закончить, чтобы считало время
+ * TODO туду раздел
  *
  */
-Future<void> main() async {
+Future<void> main(args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
   objectbox = await ObjectBox.create();
   // final Box settingsBox = objectbox.store.box<Settings>();
   // settings = settingsBox.getAll();
-
+  // print('>' + String.fromEnvironment("MODE") + '<');
+  // print('>' + String.fromEnvironment("mode") + '<');
+  // print(args);
+  // DEBUG = String.fromEnvironment("DEBUG") == '1';
+  //
+  // print('DEBUG ' + DEBUG.toString() + ' / >' + String.fromEnvironment("DEBUG") + '<');
 
 
   WindowManager.instance.waitUntilReadyToShow().then((_) async {
     // Set to frameless window
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
-    await windowManager.setSize(const Size(1200, 1000));
+    await windowManager.setSize(const Size(
+        // 800,
+        1200,
+        1000
+    ));
     await windowManager.center();
     // await windowManager.show();
     await windowManager.hide();

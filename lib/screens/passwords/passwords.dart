@@ -168,6 +168,7 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     setState(() {
       view = PasswordItemEditor(
           data: item,
+          categoryTabs: widget.categoryTabsBox.getAll(),
           category: category,
           onSave: saveItem,
           onClose: showTabs,

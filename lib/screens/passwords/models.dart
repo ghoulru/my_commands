@@ -74,7 +74,7 @@ class PasswordsItemEntity {
 
   @override
   String toString() {
-    return "$id / type=$type / subtype=$subtype / name=$name / value=$value / sort=$sort";
+    return "id=$id / type=$type / subtype=$subtype / name=$name / value=$value / sort=$sort";
   }
   //TODO историю установок значений, дата-значение, но не факт что понадобится
 }
