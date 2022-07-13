@@ -27,30 +27,36 @@ class CategoryTab extends StatelessWidget {
 
     // print("build tab=");
     // print(tab?.name);
-    // logger.d('onEdit type', onEdit.runtimeType);
+    logger.d(tab.editable);
     // logger.d('onDelete type', onDelete.runtimeType);
+
+    Widget _tabContent = Padding(
+        padding: const EdgeInsets.only(left: 8, right: 15, top: 10, bottom: 10),
+        child:
+        // Text('tab')
+        Row(
+          children: [
+            // Text(tab.id.toString()),
+            Text(tab.name),
+            const SizedBox(width: 5.0),
+            Text(
+                '(' + tab.items.length.toString() + ')',
+                style: TextStyle(color: Colors.grey[400])
+            ),
+            // const SizedBox(width: 5.0),
+            // Text(tab.id.toString()),
+          ],
+        )
+    );
+
+    if (tab.editable == false) {
+      return _tabContent;
+    }
 
     return WidgetContextMenu(
       key: UniqueKey(),
       width: 200,
-      child: Padding(
-          padding: const EdgeInsets.only(left: 8, right: 15, top: 10, bottom: 10),
-          child:
-          // Text('tab')
-          Row(
-            children: [
-              // Text(tab.id.toString()),
-              Text(tab.name),
-              const SizedBox(width: 5.0),
-              Text(
-                  '(' + tab.items.length.toString() + ')',
-                  style: TextStyle(color: Colors.grey[400])
-              ),
-              // const SizedBox(width: 5.0),
-              // Text(tab.id.toString()),
-            ],
-          )
-      ),
+      child: _tabContent,
       menu: [
         WidgetContextMenuItem(
             key: UniqueKey(),

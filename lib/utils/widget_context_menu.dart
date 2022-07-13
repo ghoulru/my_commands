@@ -69,13 +69,20 @@ class WidgetContextMenuState extends State<WidgetContextMenu> {
      width: widget.width,
      padding: const EdgeInsets.all(1),
      decoration: BoxDecoration(
-       color: Colors.grey[200],
+       color: Colors.white,
        border: Border.all(
          color: Colors.grey[300] ?? Colors.white,
          width: 0.0,
        ),
        borderRadius: BorderRadius.circular(2),
-       
+       boxShadow: [
+         BoxShadow(
+           color: Colors.grey.withOpacity(0.5),
+           spreadRadius: 1,
+           blurRadius: 5,
+           offset: const Offset(0, 2), // changes position of shadow
+         ),
+       ],
      ),
      child: Column(
        mainAxisAlignment: MainAxisAlignment.start,
@@ -185,7 +192,7 @@ class WidgetContextMenuItem extends StatelessWidget {
                 fontStyle: FontStyle.normal
             ),
           ),
-          color: onHover ? Colors.grey[300] : Colors.transparent);
+          color: onHover ? Color(0xfff1f1f1) : Colors.transparent);
     }
 
     if (disabled) {
@@ -212,12 +219,12 @@ class WidgetContextMenuDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(
+    return const Divider(
       height: 0,
       thickness: 1,
       indent: 0,
       endIndent: 0,
-      color: Colors.grey[400],
+      color: Color(0xfff1f1f1)//Colors.grey[400],
     );
   }
 }

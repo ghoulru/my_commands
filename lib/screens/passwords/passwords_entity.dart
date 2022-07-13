@@ -57,8 +57,9 @@ class PasswordsEntity extends StatelessWidget {
         break;
       case "entry":
         late Widget valueWidget;
+        // URL
         if (data.subtype == PasswordsItemEntitySubtype.url) {
-          valueWidget = MouseRegion(
+          Widget linkedText = MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
               onTap: () async {
@@ -72,17 +73,13 @@ class PasswordsEntity extends StatelessWidget {
               child: Text(data.value),
             )
           );
-          // valueWidget = GestureDetector(
-          //   onTap: () async {
-          //     final Uri _url = Uri.parse(data.value);
-          //     if (await canLaunchUrl(_url)) {
-          //       await launchUrl(_url);
-          //     } else {
-          //       throw 'Could not launch ' + data.value;
-          //     }
-          //   },
-          //   child: Text(data.value),
-          // );
+
+          valueWidget = Row(
+            children: [
+              linkedText,
+              copiedText(context, "", data.value)
+            ],
+          );
         }
         else {
           // logger.d(data);
@@ -198,12 +195,15 @@ class PasswordsEntity extends StatelessWidget {
     }
   }
 
-  Widget copiedText(context, String value) {
+  Widget copiedText(context, String value, [String text2copy = '']) {
     return GestureDetector(
       onTap: () {
-        Clipboard.setData(ClipboardData(text: value)).then((_) {
+
+        String txt = text2copy != '' ? text2copy : value;
+
+        Clipboard.setData(ClipboardData(text: txt)).then((_) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Скопировано в буфер обмена: ' + value),
+            content: Text('Скопировано в буфер обмена: ' + txt),
             duration: Duration(milliseconds: 1000),
           ));
         });

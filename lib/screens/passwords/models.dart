@@ -1,5 +1,12 @@
 import 'package:objectbox/objectbox.dart';
 
+class CategoryTabModelBase {
+  late int id;
+  late String name;
+  late int sort;
+  late List<PasswordsItem> items;
+}
+//extends CategoryTabModelBase
 /// Категория
 @Entity()
 class CategoryTabModel {
@@ -10,8 +17,13 @@ class CategoryTabModel {
   String name = '';
   int sort = 0;
 
+  @Transient()
+  bool editable = true;
+
   @Backlink()
-  final items = ToMany<PasswordsItem>();
+  var items = ToMany<PasswordsItem>();
+
+
 
   @override
   String toString() {

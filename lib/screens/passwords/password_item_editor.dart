@@ -108,6 +108,42 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
           style: ElevatedButton.styleFrom(primary: Colors.grey[400])),
     ];
 
+    //кнопки добавления
+    final List<Widget> _addButtons = [];
+
+    _addButtons.add(
+      const Text("Добавить: "),
+        // IconButton(
+        //   iconSize: 16,
+        //   icon: const Icon(Icons.add),
+        //   onPressed: () {
+        //     _entityEditor(UniqueKey(), null);
+        //   },
+        // )
+    );
+
+    entityTypes.forEach((String key, String value) {
+      _addButtons.add(
+          const SizedBox(width: 10.0)
+      );
+      _addButtons.add(
+          OutlinedButton(
+            onPressed: () {
+
+              _entityEditor(UniqueKey(), null, key);
+            },
+            child: Text(value),
+          )
+      );
+    });
+
+    final addButtons = Row(
+      children: _addButtons,
+    );
+
+
+
+
     _entities.sort((a, b) => a.sort.compareTo(b.sort));
 
     List<Widget> entitiesList = [];
@@ -154,9 +190,6 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
       ));
     }
 
-    // entityTypes.forEach((String key, String value) {
-    //   eTypes.add(DropdownMenuItem(value: key, child: Text(value)));
-    // });
 
     return Container(
         padding: const EdgeInsets.all(10.0),
@@ -168,10 +201,6 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
               Text(widget.category.name +
                   ': ' +
                   (_id == 0 ? 'Добавление паролей' : 'Редактирование паролей')),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.end,
-              //   children: buttons,
-              // ),
               TextFormField(
                 readOnly: !editable,
                 initialValue: _name,
@@ -234,14 +263,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
                 ),
               ),
               const SizedBox(height: 20.0),
-              IconButton(
-                iconSize: 16,
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  // print("Добавить запись/заголовок/разделитель");
-                  _entityEditor(UniqueKey(), null);
-                },
-              ),
+              addButtons,
               const SizedBox(height: 20.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -371,7 +393,8 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
     alertDelete.show();
   }
 
-  _entityEditor(Key key, [PasswordsItemEntity? entity]) {
+
+  _entityEditor(Key key, [PasswordsItemEntity? entity, String? _type]) {
     if (entity == null) {
       int lastSort = 0;
       if (_entities.isNotEmpty) {
@@ -379,8 +402,11 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
         lastSort = lastEntity.sort + 10;
       }
       // logger.d(lastSort, 'lastSort');
+      // logger.d(_type, '_type');
 
-      entity = PasswordsItemEntity()..sort = lastSort;
+      entity = PasswordsItemEntity()
+        ..sort = lastSort
+        ..type = _type ?? 'entry';
     }
 
     if (entity.subtype == PasswordsItemEntitySubtype.password) {

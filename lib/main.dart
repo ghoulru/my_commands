@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart' hide MenuItem;
+import 'package:my_commands/search/search_field.dart';
+import 'package:my_commands/search/search_model.dart';
 import 'package:process_run/shell.dart';
 import 'package:system_tray/system_tray.dart' as system_tray;
 import 'package:window_manager/window_manager.dart';
+import 'package:provider/provider.dart';
 import 'screens/passwords/passwords.dart';
 import 'objectbox.dart';
 // import 'objectbox.g.dart';
 // import 'utils/app_models.dart';
+import 'package:logger/logger.dart';
+var logger = Logger();
 
 enum ScreenType {
   passwords,
@@ -29,11 +34,14 @@ late List<dynamic> settings;
  * работа с окном
  * https://github.com/leanflutter/window_manager
  *
- *
+ * TODO  рядом с ЮРЛом сделать иконку копирования как текст
+ * DONE в редакторе сайтов быстрое добавление чего-л.
+ * TODO в редакторе добавление текста большого
  * TODO добавление сайта в избранное и вывод их списка снизу кнопками И в меню в трее
  * TODO поиск по сайтам в разделе пароли
  * TODO раздел с моими работами, с кнопками начать работу, пауза, закончить, чтобы считало время
  * TODO туду раздел
+ *
  *
  */
 Future<void> main(args) async {
@@ -56,8 +64,8 @@ Future<void> main(args) async {
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
     await windowManager.setSize(const Size(
-        // 800,
-        1200,
+        800,
+        // 1200,
         1000
     ));
     await windowManager.center();
@@ -70,7 +78,24 @@ Future<void> main(args) async {
   // print("---main start---");
   // print(objectbox.store);
 
-  runApp(const MyApp());
+  // runApp(const MyApp());
+  runApp(const MyAppWithProvider());
+}
+
+class MyAppWithProvider extends StatelessWidget {
+  const MyAppWithProvider({Key? key}) : super(key: key);
+
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => SearchModel()),
+        ],
+        child: const MyApp()
+    );
+  }
+
 }
 
 class MyApp extends StatefulWidget {
@@ -264,36 +289,44 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    // Widget screen = Passwords();
-    // TeploinformForm()
-    // debugPrint("main build " + _currentScreen.toString());
-    // debugPrintStack(label: '123', maxFrames: 2);
-    // print(StackTrace.current.toString());
 
-    return MaterialApp(
+    var passwords = Consumer<SearchModel>(
+        builder: (context, value, child) {
+          // logger.d(value.searchString, 'searchString inside main');
+          return Passwords(store: objectbox.store, searchString: value.searchString);
+        },
+      );
+
+    Widget matApp = MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(34.0),
-          child: AppBar(
-            // title: const Text("Name"),
-            elevation: 0,
-            backgroundColor: Colors.blueGrey[500],
-            bottom: TabBar(
-                controller: _mainTabsController,
-                isScrollable: true,
-                indicatorColor: Colors.black,
-                tabs: [
-                  Tab(text: Passwords.title, height: 30),
-                  const Tab(text: "Чето еще", height: 30),
-                ]
+          preferredSize: const Size.fromHeight(35.0),//34
+
+          child: Container(
+            color: Colors.blueGrey[500],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                    controller: _mainTabsController,
+                    isScrollable: true,
+                    indicatorColor: Colors.black,
+                    tabs: [
+                      Tab(text: Passwords.title, height: 30),
+                      const Tab(text: "Чето еще", height: 30),
+                    ]
+                ),
+                const SearchField(),
+              ],
             ),
-          ),
+          )
         ),
         body: TabBarView(
             controller: _mainTabsController,
             children: [
-              Passwords(store: objectbox.store),
+              // Passwords(store: objectbox.store),
+              passwords,
               const Text("Чето еще вывод")
             ]
         ),
@@ -302,6 +335,14 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
         // ),
       ),
     );
+
+    // return Consumer<SearchModel>(
+    //   builder: (context, value, child) {
+    //     logger.d(value.searchString, 'searchString inside main');
+    //     return matApp;
+    //   },
+    // );
+    return matApp;
   }
 
   @override

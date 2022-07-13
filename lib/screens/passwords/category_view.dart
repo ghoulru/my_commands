@@ -42,6 +42,8 @@ class CategoryViewState extends State<CategoryView> {
   late encrypt.Encrypter _encrypter;
   late encrypt.IV _encrypterIV;
 
+  // late List<VerticalTabs> tabsContent;
+
   @override
   void initState() {
     super.initState();
@@ -57,23 +59,25 @@ class CategoryViewState extends State<CategoryView> {
     //   _thisActiveTabAndItem[tab.id] = 0;
     // }
     _thisActiveTabAndItem = widget.activeTabAndItem;
-    logger.d(_thisActiveTabAndItem, '_thisActiveTabAndItem CategoryViewState initState');
+    // logger.d(_thisActiveTabAndItem, '_thisActiveTabAndItem CategoryViewState initState');
 
     final key = encrypt.Key.fromUtf8(appEncryptSecretKey);
     _encrypterIV = encrypt.IV.fromLength(appEncryptSecretKeyIV);
     _encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+    // tabsContent = [];
   }
 
   @override
   void dispose() {
-    // final Box categoryTabsBox = widget.store.box<CategoryTabModel>();
-    // final Box passwordsItemsBox = widget.store.box<PasswordsItem>();
-    // for (PasswordsItem item in category.items)
-    // logger.d('dispose cat CategoryView');
-    // activeTabAndItem.forEach((catId, siteIndex) {
-    //   print("$catId, $siteIndex");
-    //   // if ()
-    // });
+
+    //
+    // for (VerticalTabs tc in tabsContent) {
+    //   logger.d(tc.runtimeType);
+    //   if (tc.runtimeType == VerticalTabs)
+    //     tc.dispose();
+    // }
+    // tabsContent = [];
 
     super.dispose();
   }
@@ -82,9 +86,10 @@ class CategoryViewState extends State<CategoryView> {
   Widget build(BuildContext context) {
     final List<Widget> tabsContent = [];
 
+    // tabsContent = [];
+
     for (var tab in widget.tabs) {
-      // logger.d(categoryTab.tab);
-      // tabsContent.add(Text("tab content: " + categoryTab.tab.name));
+
       if (tab.items.length == 0) {
         tabsContent.add(Text(tab.name + " has no items"));
       } else {
@@ -136,28 +141,11 @@ class CategoryViewState extends State<CategoryView> {
   }
 
 
-  // void onSelectSite(index, category) {
-  //   logger.d(index, 'VerticalTabs onSelect ' + category.id.toString());
-  //
-  //   Map<int,int> cisi = {...categoryItemsSelectedIndex};
-  //   cisi[ category.id ] = index;
-  //
-  //   WidgetsBinding.instance!.addPostFrameCallback((_){
-  //     setState(() {
-  //       categoryItemsSelectedIndex = cisi;
-  //     });
-  //   });
-  //
-  // }
 
   Widget categoryPasswords(category) {
-    // logger.d(category.items);
 
     final List<Tab> itemTabs = [];
     final List<Widget> itemTabsContent = [];
-    // logger.d(widget.showItemEditor.runtimeType);
-
-    //TODO добавить строку быстрого поиска, наверное лучше в шапку, т.е. надо использовать редукс= Bloc
 
     //сортировка по имени или как то иначе, если будут кнопки
     final List<PasswordsItem> categoryItems = category.items;
