@@ -99,27 +99,29 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
     if (currentTabId == searchTabId) {
 
       ToMany<PasswordsItem> searchResult = ToMany<PasswordsItem>();
-      for (CategoryTabModel tab in tabs) {
-        if (tab.items.isNotEmpty) {
-          for (PasswordsItem passItem in tab.items) {
-            if (passItem.name.contains(widget.searchString)) {
-              searchResult.add(passItem);
+      if (widget.searchString != '') {
+        for (CategoryTabModel tab in tabs) {
+          if (tab.items.isNotEmpty) {
+            for (PasswordsItem passItem in tab.items) {
+              if (passItem.name.contains(widget.searchString)) {
+                searchResult.add(passItem);
+              }
             }
           }
         }
-      }
-      // if (searchResult.isNotEmpty)
-      {
-        final CategoryTabModel searchTab = CategoryTabModel()
-          ..id = searchTabId
-          ..name = 'Результаты Поиска'
-          ..sort = 1000
-          ..editable = false
-          ..items = searchResult;
 
-        tabs.add(searchTab);
-      }
+        // if (searchResult.isNotEmpty)
+            {
+          final CategoryTabModel searchTab = CategoryTabModel()
+            ..id = searchTabId
+            ..name = 'Результаты Поиска'
+            ..sort = 1000
+            ..editable = false
+            ..items = searchResult;
 
+          tabs.add(searchTab);
+        }
+      }
       if (searchResult.isEmpty) changeTab = false;
 
     }
@@ -249,8 +251,8 @@ class PasswordsState extends State<Passwords> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(covariant Passwords oldWidget) {
     super.didUpdateWidget(oldWidget);
-    logger.d(widget.searchString + '/ old=' + oldWidget.searchString,
-        'change search didUpdateWidget');
+    // logger.d(widget.searchString + '/ old=' + oldWidget.searchString,
+    //     'change search didUpdateWidget');
 
     // var rnd = Random();
     // showTabs(currentTabId: rnd.nextInt(5));

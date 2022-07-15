@@ -93,7 +93,7 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
             item.category.target = _category;
             item.entities.addAll(_entities);
 
-            logger.d(item, 'onPressed save passwords item');
+            // logger.d(item, 'onPressed save passwords item');
 
             widget.onSave(item, _category, widget.tabIndex);
           }
@@ -129,7 +129,6 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
       _addButtons.add(
           OutlinedButton(
             onPressed: () {
-
               _entityEditor(UniqueKey(), null, key);
             },
             child: Text(value),
@@ -407,6 +406,8 @@ class PasswordItemEditorState extends State<PasswordItemEditor> {
       entity = PasswordsItemEntity()
         ..sort = lastSort
         ..type = _type ?? 'entry';
+
+      if (_type != null &&_type == 'spacer') entity.value = "20";
     }
 
     if (entity.subtype == PasswordsItemEntitySubtype.password) {

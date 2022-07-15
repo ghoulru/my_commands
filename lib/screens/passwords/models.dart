@@ -55,6 +55,7 @@ enum PasswordsItemEntitySubtype {
   string,
   url,
   password,
+  text
 }
 
 @Entity()

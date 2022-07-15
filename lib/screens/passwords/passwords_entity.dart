@@ -57,6 +57,7 @@ class PasswordsEntity extends StatelessWidget {
         break;
       case "entry":
         late Widget valueWidget;
+
         // URL
         if (data.subtype == PasswordsItemEntitySubtype.url) {
           Widget linkedText = MouseRegion(
@@ -95,18 +96,53 @@ class PasswordsEntity extends StatelessWidget {
           valueWidget = copiedText(context, val);
         }
 
+        late Widget contentWidget;
+        // if (data.subtype == PasswordsItemEntitySubtype.text) {
+        //   contentWidget = Column(
+        //     children: [
+        //       Text(data.name + ':', style: labelStyle),
+        //       const SizedBox(height: 5.0),
+        //       valueWidget,
+        //     ]
+        //   );
+        // }
+        // else {
+        //   contentWidget = Row(
+        //       children: [
+        //         Text(data.name + ':', style: labelStyle),
+        //         const SizedBox(width: 10.0),
+        //         valueWidget,
+        //       ]
+        //   );
+        // }
+
+        // contentWidget = Row(
+        //     children: [
+        //       Text(data.name + ':', style: labelStyle),
+        //       const SizedBox(width: 10.0),
+        //       valueWidget,
+        //     ]
+        // );
+        // contentWidget = valueWidget;
+        contentWidget = Expanded(
+          child: valueWidget
+        );
 
         content = Column(
             children: [
-              Row(children: [
-                Text(data.name + ':', style: labelStyle),
-                const SizedBox(width: 10.0),
-                valueWidget,
-              ]),
+              Row(
+                  children: [
+                    Text(data.name + ':', style: labelStyle),
+                    const SizedBox(width: 10.0),
+                    // valueWidget,
+                    contentWidget,
+                  ],
+                crossAxisAlignment: CrossAxisAlignment.start,
+              ),
               marginBtm(5)
             ],
-            // mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start);
+            crossAxisAlignment: CrossAxisAlignment.start
+        );
         break;
 
 
@@ -196,25 +232,54 @@ class PasswordsEntity extends StatelessWidget {
   }
 
   Widget copiedText(context, String value, [String text2copy = '']) {
+
+    Widget content = Text(value);
+    // Widget content = Row(
+    //   children: [
+    //     Expanded(
+    //         child: Text(value)
+    //     ),
+    //     const SizedBox(width: 20.0)
+    //   ],
+    // );
+
+
     return GestureDetector(
       onTap: () {
 
         String txt = text2copy != '' ? text2copy : value;
+        String txtTip = txt;
+        if (txt.length > 100) txtTip = txt.substring(0, 50) + '...';
 
         Clipboard.setData(ClipboardData(text: txt)).then((_) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Скопировано в буфер обмена: ' + txt),
-            duration: Duration(milliseconds: 1000),
+            content: Text('Скопировано в буфер обмена: ' + txtTip),
+            duration: const Duration(milliseconds: 1000),
           ));
         });
       },
       child: HoverWidget(
           onHover: (e) {},
-          child: Text(value + '       '),
+          // child: Text(value + '       '),
+          child: content,
+          // child: Row(
+          //   children: [
+          //     Flexible(
+          //         flex: 1,
+          //         child:  Text("value here")
+          //     )
+          //   ],
+          // ),
+          // child: Expanded(
+          //     flex: 1,
+          //     child:  Text("value here")
+          // ),
           hoverChild: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(value),
+              Flexible(child: Text(value)),
+              // Text(value),
+              // content,
               const SizedBox(width: 10.0),
               Icon(
                 Icons.copy,
@@ -225,32 +290,32 @@ class PasswordsEntity extends StatelessWidget {
           )
       )
     );
-    return HoverWidget(
-        onHover: (e) {},
-        child: Text(value + '       '),
-        hoverChild: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(value),
-            const SizedBox(width: 10.0),
-            GestureDetector(
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: value)).then((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Скопировано в буфер обмена: ' + value),
-                        duration: Duration(milliseconds: 1000),
-                    ));
-                  });
-                },
-                child: Icon(
-                  Icons.copy,
-                  color: Colors.grey[600],
-                  size: 16.0,
-                ),
-            ),
-          ],
-        )
-    );
+    // return HoverWidget(
+    //     onHover: (e) {},
+    //     child: Text(value + '       '),
+    //     hoverChild: Row(
+    //       crossAxisAlignment: CrossAxisAlignment.center,
+    //       children: [
+    //         Text(value),
+    //         const SizedBox(width: 10.0),
+    //         GestureDetector(
+    //             onTap: () {
+    //               Clipboard.setData(ClipboardData(text: value)).then((_) {
+    //                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    //                     content: Text('Скопировано в буфер обмена: ' + value),
+    //                     duration: Duration(milliseconds: 1000),
+    //                 ));
+    //               });
+    //             },
+    //             child: Icon(
+    //               Icons.copy,
+    //               color: Colors.grey[600],
+    //               size: 16.0,
+    //             ),
+    //         ),
+    //       ],
+    //     )
+    // );
   }
 
 

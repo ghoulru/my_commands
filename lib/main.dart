@@ -34,12 +34,10 @@ late List<dynamic> settings;
  * работа с окном
  * https://github.com/leanflutter/window_manager
  *
- * TODO  рядом с ЮРЛом сделать иконку копирования как текст
- * DONE в редакторе сайтов быстрое добавление чего-л.
- * TODO в редакторе добавление текста большого
+ *
+ *
  * TODO добавление сайта в избранное и вывод их списка снизу кнопками И в меню в трее
- * TODO поиск по сайтам в разделе пароли
- * TODO раздел с моими работами, с кнопками начать работу, пауза, закончить, чтобы считало время
+ * TODO раздел с моими работами, с кнопками начать работу, пауза, закончить, чтобы считало время - тут использовать роуты как в тесте
  * TODO туду раздел
  *
  *
@@ -64,8 +62,8 @@ Future<void> main(args) async {
     // await WindowManager.instance.setAsFrameless();
     // await windowManager.setTitleBarStyle('hidden');
     await windowManager.setSize(const Size(
-        800,
-        // 1200,
+        // 800,
+        1200,
         1000
     ));
     await windowManager.center();
@@ -231,8 +229,43 @@ class _MyAppState extends State<MyApp> with WindowListener, SingleTickerProvider
       );
     }
 
+    var shell = Shell(verbose: false);
+    // const String progsDir = ""
+    // C:\Program Files\PuTTY\putty.exe
     final menu = [
       system_tray.SubMenu(label: 'Node.js версии', children: nodeVersionsItems),
+      system_tray.MenuItem(
+        label: "PUTTY",
+        onClicked: () async {
+          await shell.run('d:/OpenServer/putty.exe');
+        },
+      ),
+      system_tray.SubMenu(
+          label: 'Программы',
+          children: <system_tray.MenuItem>[
+            system_tray.MenuItem(
+              label: "PNG оптимизатор",
+              onClicked: () async {
+                // var shell = Shell(verbose: false);
+                await shell.run('d:/OpenServer/progs/Graphics/PngOptimizer/PngOptimizer.exe');
+              },
+            ),
+            system_tray.MenuItem(
+              label: "Графический редактор PixBuilder",
+              onClicked: () async {
+                // var shell = Shell(verbose: false);
+                await shell.run('d:/OpenServer/progs/Graphics/PixBuilder/PixBuilder.exe');
+              },
+            ),
+            system_tray.MenuItem(
+              label: "Редактор ICO файлов",
+              onClicked: () async {
+                // var shell = Shell(verbose: false);
+                await shell.run('d:/OpenServer/progs/Graphics/IcoFXPortable/IcoFXPortable.exe');
+              },
+            ),
+          ]
+      ),
       // MenuItem(
       //     label: 'Закрыть',
       //     onClicked: () async {

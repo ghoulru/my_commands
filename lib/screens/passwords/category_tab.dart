@@ -27,7 +27,7 @@ class CategoryTab extends StatelessWidget {
 
     // print("build tab=");
     // print(tab?.name);
-    logger.d(tab.editable);
+    // logger.d(tab.editable);
     // logger.d('onDelete type', onDelete.runtimeType);
 
     Widget _tabContent = Padding(

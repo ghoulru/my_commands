@@ -33,7 +33,8 @@ const Map<String, String> entryNames = {
   "url": "URL",
   "address": "Адрес",
   "host": "Host",
-  "dbname": "Имя БД"
+  "dbname": "Имя БД",
+  "text": "Описание"
 };
 
 class PasswordEntityEditor extends StatefulWidget {
@@ -176,6 +177,9 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
                   case "password":
                     subt = PasswordsItemEntitySubtype.password;
                     break;
+                  case "text":
+                    subt = PasswordsItemEntitySubtype.text;
+                    break;
                   default:
                     subt = PasswordsItemEntitySubtype.string;
                     break;
@@ -213,9 +217,11 @@ class PasswordEntityEditorState extends State<PasswordEntityEditor> {
           },
           decoration: InputDecoration(
             labelText: _type == 'spacer'
-                ? 'Значение в ед. изм., например ' + defaultSpacer
+                ? 'Числовое значение в ед. изм., например ' + defaultSpacer
                 : 'Значение',
           ),
+          minLines: _subtype == PasswordsItemEntitySubtype.text ? 10 : 1,
+          maxLines: 10,
         ),
       );
     }
